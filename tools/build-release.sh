@@ -13,7 +13,7 @@ grep -Fq "\$plugin->release = '${release}';" "$pluginroot/version.php"
 mkdir -p "$staging/criteriaoutcomes" "$pluginroot/dist"
 for path in backup restore classes cli db docs examples lang tests CHANGES.md LICENSE README.md index.php lib.php quiz.php \
         quiz_mapping.php quiz_evidence.php assessment.php student_progress.php criterion_progress.php boe.php \
-        curriculum_manage.php import_history.php json.php version.php; do
+        curriculum_manage.php import_history.php json.php styles.css version.php; do
     cp -a "$pluginroot/$path" "$staging/criteriaoutcomes/"
 done
 

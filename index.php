@@ -54,22 +54,6 @@ $service = new \local_criteriaoutcomes\service\import_service();
 $provider = new \local_criteriaoutcomes\provider\json_provider();
 $preview = null;
 $notice = null;
-$selectedscaleid = 0;
-
-$scaletemplate = optional_param('createscaletemplate', '', PARAM_ALPHANUMEXT);
-if ($scaletemplate !== '') {
-    require_capability('local/criteriaoutcomes:import', $context);
-    require_sesskey();
-    try {
-        $selectedscaleid = (new \local_criteriaoutcomes\service\scale_template_service())->create(
-            $courseid,
-            $scaletemplate
-        );
-        $notice = get_string('scaletemplatecreated', 'local_criteriaoutcomes');
-    } catch (Throwable $e) {
-        $notice = $e->getMessage();
-    }
-}
 
 if (!$CFG->enableoutcomes) {
     echo $OUTPUT->header();
@@ -91,10 +75,12 @@ if (optional_param('confirmimport', 0, PARAM_BOOL)) {
     require_sesskey();
     try {
         $token = required_param('previewtoken', PARAM_ALPHANUM);
-        $curriculum = $SESSION->local_criteriaoutcomes_preview[$token] ?? null;
-        if (!is_array($curriculum)) {
+        $storedpreview = $SESSION->local_criteriaoutcomes_preview[$token] ?? null;
+        if (!is_array($storedpreview) || ($storedpreview['courseid'] ?? 0) !== $courseid ||
+                !is_array($storedpreview['curriculum'] ?? null)) {
             throw new InvalidArgumentException(get_string('previewexpired', 'local_criteriaoutcomes'));
         }
+        $curriculum = $storedpreview['curriculum'];
         $counts = $service->import($courseid, required_param('scaleid', PARAM_INT), $curriculum);
         unset($SESSION->local_criteriaoutcomes_preview[$token]);
         $notice = get_string('importcomplete', 'local_criteriaoutcomes', (object)$counts);
@@ -110,16 +96,30 @@ $scales = $service->available_scales($courseid);
 $form = new \local_criteriaoutcomes\form\import_form(null, [
     'courseid' => $courseid,
     'scales' => $scales,
-    'selectedscaleid' => $selectedscaleid,
 ]);
-if ($form->get_data()) {
+if ($form->is_cancelled()) {
+    redirect(new moodle_url('/local/criteriaoutcomes/index.php', ['id' => $courseid]));
+}
+$formdata = $form->get_data();
+if ($formdata) {
     require_capability('local/criteriaoutcomes:import', $context);
     try {
+        if ($formdata->valuation === 'existing') {
+            $scaleid = (int)$formdata->scaleid;
+        } else {
+            $template = $formdata->valuation === 'achievement' ?
+                \local_criteriaoutcomes\service\scale_template_service::ACHIEVEMENT :
+                \local_criteriaoutcomes\service\scale_template_service::NUMERIC;
+            $scaleid = (new \local_criteriaoutcomes\service\scale_template_service())->create($courseid, $template);
+        }
         $content = $form->content();
-        $preview = $service->preview($courseid, $provider->parse($content), (int)$form->get_data()->scaleid);
-        $preview['scaleid'] = (int)$form->get_data()->scaleid;
+        $preview = $service->preview($courseid, $provider->parse($content), $scaleid);
+        $preview['scaleid'] = $scaleid;
         $previewtoken = bin2hex(random_bytes(16));
-        $SESSION->local_criteriaoutcomes_preview[$previewtoken] = $preview;
+        $SESSION->local_criteriaoutcomes_preview[$previewtoken] = [
+            'courseid' => $courseid,
+            'curriculum' => $preview,
+        ];
         $preview['previewtoken'] = $previewtoken;
     } catch (Throwable $e) {
         $notice = $e->getMessage();
@@ -167,39 +167,6 @@ if (!$jsonpage && has_capability('local/criteriaoutcomes:mapquiz', $context)) {
 if ($notice) {
     $notificationtype = str_contains($notice, (string)get_string('imported', 'local_criteriaoutcomes')) ? 'success' : 'info';
     echo $OUTPUT->notification(s($notice), $notificationtype);
-}
-
-if ($jsonpage && has_capability('local/criteriaoutcomes:import', $context)) {
-    echo $OUTPUT->heading(get_string('recommendedscales', 'local_criteriaoutcomes'), 3);
-    echo html_writer::tag('p', get_string('scaletemplatehelp', 'local_criteriaoutcomes'));
-    foreach (
-        [
-            \local_criteriaoutcomes\service\scale_template_service::NUMERIC => 'scaletemplatenumericname',
-            \local_criteriaoutcomes\service\scale_template_service::ACHIEVEMENT => 'scaletemplateachievementname',
-        ] as $template => $namestring
-    ) {
-        echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mb-2']);
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $courseid]);
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-        echo html_writer::tag('span', s(get_string($namestring, 'local_criteriaoutcomes')), ['class' => 'mr-2']);
-        $templateservice = new \local_criteriaoutcomes\service\scale_template_service();
-        echo html_writer::tag(
-            'span',
-            s(implode(' · ', $templateservice->levels($template))),
-            ['class' => 'd-block text-muted']
-        );
-        $existingid = $templateservice->existing_id($courseid, $template);
-        echo html_writer::tag(
-            'span',
-            get_string($existingid ? 'scaleavailablecourse' : 'scaleavailabletemplate', 'local_criteriaoutcomes'),
-            ['class' => 'badge badge-info mr-2']
-        );
-        echo html_writer::tag('button', get_string('createsandselectscale', 'local_criteriaoutcomes'), [
-            'type' => 'submit', 'name' => 'createscaletemplate', 'value' => $template, 'class' => 'btn btn-secondary',
-        ]);
-        echo html_writer::end_tag('form');
-    }
-    echo $OUTPUT->heading(get_string('existingscales', 'local_criteriaoutcomes'), 3);
 }
 
 if ($preview) {

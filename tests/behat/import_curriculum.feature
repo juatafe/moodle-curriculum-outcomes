@@ -29,6 +29,7 @@ Feature: Import curriculum criteria as native Outcomes
     When I visit the curriculum outcomes page for course "C1"
     And I follow "Import from JSON"
     And I set the field "Or paste JSON" to "{\"metadata\":{\"name\":\"Behat curriculum\",\"type\":\"fp\"},\"resultados\":[{\"codigo\":\"RA1\",\"nombre\":\"Result one\",\"criterios\":[{\"codigo\":\"RA1.a\",\"nombre\":\"Observable criterion\"}]}]}"
+    And I set the field "Use an existing Moodle scale (advanced)" to "1"
     And I set the field "Outcome scale" to "Criteria scale"
     And I press "Validate and preview"
     Then I should see "Import preview"
@@ -40,17 +41,20 @@ Feature: Import curriculum criteria as native Outcomes
     And I should see "Observable criterion"
 
   @javascript
-  Scenario: Scale selection is explicit and a recommended template becomes selected
+  Scenario: Scale selection is explicit and a recommended scale is created transparently
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage
     When I visit the curriculum outcomes page for course "C1"
     And I follow "Import from JSON"
-    Then the field "Outcome scale" matches value "0"
-    And I should see "Available template"
-    And I should see "Insufficient · Sufficient · Good · Very good · Excellent"
-    When I press "Create and select"
-    Then I should see "Available in this course"
-    And the field "Outcome scale" does not match value "0"
+    Then the field "Achievement — 5 levels" matches value ""
+    And the field "Numeric — 0 to 10" matches value ""
+    And the field "Use an existing Moodle scale (advanced)" matches value ""
+    And I should not see "Available template"
+    And I should not see "Create and select"
+    When I set the field "Or paste JSON" to "{\"metadata\":{\"name\":\"Recommended scale\",\"type\":\"fp\"},\"resultados\":[{\"codigo\":\"RA1\",\"nombre\":\"Result one\",\"criterios\":[{\"codigo\":\"RA1.a\",\"nombre\":\"Criterion\"}]}]}"
+    And I set the field "Achievement — 5 levels" to "1"
+    And I press "Validate and preview"
+    Then I should see "Import preview"
 
   Scenario: An administrator can open the curriculum page
     Given I log in as "admin"

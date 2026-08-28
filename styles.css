@@ -1,0 +1,40 @@
+.local-criteriaoutcomes-flow {
+    max-width: 64rem;
+}
+
+.local-criteriaoutcomes-flow select,
+.local-criteriaoutcomes-flow input[type="text"],
+.local-criteriaoutcomes-flow textarea {
+    max-width: 100%;
+}
+
+.local-criteriaoutcomes-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+
+.local-criteriaoutcomes-parent {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .25rem;
+    overflow-wrap: anywhere;
+}
+
+.local-criteriaoutcomes-parent > summary {
+    cursor: pointer;
+    font-weight: 600;
+    padding: .75rem;
+}
+
+@media (max-width: 576px) {
+    .local-criteriaoutcomes-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .local-criteriaoutcomes-actions .btn,
+    .local-criteriaoutcomes-actions form,
+    .local-criteriaoutcomes-actions form .btn {
+        width: 100%;
+    }
+}

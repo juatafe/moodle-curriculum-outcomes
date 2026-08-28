@@ -154,18 +154,18 @@ Grade the normal activity item and Outcome items separately. Confirm that the pl
 - `bash dev/qa.sh` passes PHP lint and Moodle PHPCS with zero errors and zero warnings.
 ## 0.4.0-dev closure results
 
-The hierarchy/home/scale/Quiz-UX closure raises the suite to 92 tests and 356 assertions on every matrix target. Browser coverage includes FP title filtering, ESO band selection, explicit scale choice/create-and-select, hidden contribution weights and aggregation only after two mappings.
+The guided import closure raises the suite to 95 tests and 369 assertions on every matrix target. Browser coverage includes FP title filtering, ESO band selection, no arbitrary scale default, transparent recommended-scale creation, back navigation and preserved valid state.
 
 Final full PHPUnit matrix after the failed-batch backup regression:
 
 | Moodle | PHP | Database | Tests | Assertions | Result |
 |---|---|---|---:|---:|---|
-| 4.5.13+ | 8.3.33 | PostgreSQL 16.15 | 92 | 356 | PASS |
-| 5.0.9 | 8.3.33 | PostgreSQL 16.15 | 92 | 356 | PASS |
-| 5.1.6+ | 8.3.33 | PostgreSQL 16.15 | 92 | 356 | PASS |
-| 5.1.6+ | 8.3.33 | MariaDB 11.4.13 | 92 | 356 | PASS |
+| 4.5.13+ | 8.3.33 | PostgreSQL 16.15 | 95 | 369 | PASS |
+| 5.0.9 | 8.3.33 | PostgreSQL 16.15 | 95 | 369 | PASS |
+| 5.1.6+ | 8.3.33 | PostgreSQL 16.15 | 95 | 369 | PASS |
+| 5.1.6+ | 8.3.33 | MariaDB 11.4.13 | 95 | 369 | PASS |
 
-The complete plugin Behat suite ran on Moodle 5.1.6+ with PostgreSQL and Selenium Chromium: 6 features, 17 scenarios and 390 steps passed. It covers separated JSON and controlled BOE imports, FP title filtering, ESO band selection, explicit scale selection, Quiz mapping UX, teacher/student assessment-progress visibility, archive/delete, safe undo and five-language page smokes.
+The complete plugin Behat suite ran on Moodle 5.1.6+ with PostgreSQL and Selenium: 6 features, 18 scenarios and 440 steps passed. It covers separated JSON and guided BOE imports, FP/ESO hierarchy, explicit valuation with no default, transparent scale creation, reversible navigation, Quiz mapping UX, assessment progress, lifecycle and five-language page smokes.
 
 A real Moodle 5.1 upgrade started from the immutable `0.3.0-alpha` artifact at version `2026082702`. Two legacy curricula sharing `RA1.a`, mapped Outcomes, a real grade item/grade, Quiz mappings, assessment/feedback, rubric mapping, checklist response, judgement and feedback-read state survived. Outcome ID 1 remained ID 1 and its label became `RA1.a — Instal·la el sistema operatiu`; grade item outcome ID 1 and final grade `0.75` were unchanged. An external Outcome remained byte-for-byte unchanged. No historical batches were invented.
 

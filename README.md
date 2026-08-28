@@ -48,7 +48,11 @@ Legacy names prefixed by their codes, such as `RA1.a: Text`, are accepted and no
 
 ## Scales
 
-The selected scale must be visible in the course and is never silently preselected. Teachers may explicitly create a course-local recommended ordinal scale: **0–10** or **Achievement (5 levels)**. Creation is idempotent, never adopts an external same-name scale and persists labels in the active language. These scales assess criteria; they do not change activity/course grades or gradebook aggregation. See [`docs/SCALES.md`](docs/SCALES.md).
+The valuation choice is never silently preselected. Teachers choose **Achievement (5 levels)**, **0–10**, or an existing Moodle scale as an advanced option. Recommended course-local scales are created or reused transparently. Creation is idempotent, never adopts an external same-name scale and persists labels in the active language. These scales assess criteria; they do not change activity/course grades or gradebook aggregation. See [`docs/SCALES.md`](docs/SCALES.md).
+
+## Guided import
+
+BOE import separates source, curriculum, valuation and review. Every pre-confirmation step has its own back action; valid title/module, band/subject, valuation and criterion choices are retained, while changing an upstream curriculum choice invalidates its derived preview. Review groups criteria in accessible collapsible RA/CE sections and provides selected counts, select/deselect actions and an explicit **Import N criteria** action. The layout uses fluid Moodle controls and stacked narrow-screen actions.
 
 ## Import lifecycle and safety
 

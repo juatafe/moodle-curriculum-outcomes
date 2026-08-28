@@ -49,14 +49,60 @@ class import_form extends \moodleform {
             ['rows' => 14, 'class' => 'w-100']
         );
         $mform->setType('jsontext', PARAM_RAW);
+        $valuationoptions = [
+            $mform->createElement(
+                'radio',
+                'valuation',
+                '',
+                get_string('valuationachievement', 'local_criteriaoutcomes'),
+                'achievement'
+            ),
+            $mform->createElement(
+                'radio',
+                'valuation',
+                '',
+                get_string('valuationnumeric', 'local_criteriaoutcomes'),
+                'numeric'
+            ),
+            $mform->createElement(
+                'radio',
+                'valuation',
+                '',
+                get_string('valuationexisting', 'local_criteriaoutcomes'),
+                'existing'
+            ),
+        ];
+        $mform->addGroup(
+            $valuationoptions,
+            'valuationgroup',
+            get_string('choosevaluation', 'local_criteriaoutcomes'),
+            ['<br>'],
+            false
+        );
+        $mform->addRule('valuationgroup', null, 'required', null, 'client');
+        $mform->setType('valuation', PARAM_ALPHA);
         $scaleoptions = [0 => get_string('choosedots')] + $this->_customdata['scales'];
         $mform->addElement('select', 'scaleid', get_string('selectscale', 'local_criteriaoutcomes'), $scaleoptions);
         $mform->setType('scaleid', PARAM_INT);
-        $mform->addRule('scaleid', null, 'required', null, 'client');
-        $mform->setDefault('scaleid', (int)($this->_customdata['selectedscaleid'] ?? 0));
+        $mform->setDefault('scaleid', 0);
+        $mform->hideIf('scaleid', 'valuation', 'neq', 'existing');
         $mform->addElement('hidden', 'id', $this->_customdata['courseid']);
         $mform->setType('id', PARAM_INT);
         $this->add_action_buttons(true, get_string('preview', 'local_criteriaoutcomes'));
+    }
+
+    /**
+     * Validate the explicit valuation choice without accepting an arbitrary default scale.
+     */
+    public function validation($data, $files): array {
+        $errors = parent::validation($data, $files);
+        $valuation = $data['valuation'] ?? '';
+        if (!in_array($valuation, ['achievement', 'numeric', 'existing'], true)) {
+            $errors['valuationgroup'] = get_string('required');
+        } else if ($valuation === 'existing' && empty($data['scaleid'])) {
+            $errors['scaleid'] = get_string('required');
+        }
+        return $errors;
     }
 
     /**

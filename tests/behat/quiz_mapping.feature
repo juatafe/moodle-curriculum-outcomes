@@ -36,6 +36,7 @@ Feature: Map quiz slots to curriculum criteria
     And I visit the curriculum outcomes page for course "C1"
     And I follow "Import from JSON"
     And I set the field "Or paste JSON" to "{\"metadata\":{\"name\":\"Quiz curriculum\",\"type\":\"fp\"},\"resultados\":[{\"codigo\":\"RA1\",\"nombre\":\"Result one\",\"criterios\":[{\"codigo\":\"RA1.a\",\"nombre\":\"Criterion A\"}]}]}"
+    And I set the field "Use an existing Moodle scale (advanced)" to "1"
     And I set the field "Outcome scale" to "Criteria scale"
     And I press "Validate and preview"
     And I press "Confirm import"

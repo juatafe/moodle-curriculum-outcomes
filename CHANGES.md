@@ -4,7 +4,8 @@
 
 - Preserve FP title→module and ESO course-band→subject selection hierarchies from deterministic BOE structure.
 - Separate JSON import from the course home and clarify import, management, mapping and current-curriculum tasks.
-- Make scale selection explicit; recommended templates now show levels/state and create-and-select in one action.
+- Guide imports through source, curriculum, valuation and review, with reversible navigation and state invalidation.
+- Make valuation pedagogical and explicit; recommended scales are created/reused transparently without an arbitrary default.
 - Clarify Quiz question contribution weight and show aggregation only for criteria with multiple mapped questions, without changing evidence semantics.
 
 ### Added
@@ -23,6 +24,8 @@
 - Student progress SQL uses criterion ID as the unique Moodle record key and then groups explicitly by parent, preserving sibling RA/CE criteria.
 - Failed imports retain one audit batch outside the curricular transaction but roll back all curriculum and partial item writes.
 - BOE search metadata is normalized into human-readable result cards and education family is detected only when unambiguous.
+- Large previews use accessible collapsible RA/CE groups, criterion counts and select/deselect actions.
+- Import controls and previews adapt to narrow viewports without fixed widths or horizontal overflow.
 
 ### Fixed
 
@@ -33,8 +36,8 @@
 
 ### Tested
 
-- PHPUnit: 89 tests / 342 assertions on Moodle 4.5.13+, 5.0.9 and 5.1.6+ with PostgreSQL 16; Moodle 5.1.6+ with MariaDB 11.4.
-- Behat: 6 features, 14 scenarios and 309 steps on Moodle 5.1.6+.
+- PHPUnit: 95 tests / 369 assertions on Moodle 4.5.13+, 5.0.9 and 5.1.6+ with PostgreSQL 16; Moodle 5.1.6+ with MariaDB 11.4.
+- Behat: 6 features, 18 scenarios and 440 steps on Moodle 5.1.6+.
 - Real 0.3.0-alpha → 0.4.0-dev upgrade and clean-install schema equivalence on PostgreSQL 16.
 - Production-style failed-import rollback through fresh connections on PostgreSQL 16 and MariaDB 11.4.
 - PHP lint and Moodle PHPCS: zero errors and zero warnings.

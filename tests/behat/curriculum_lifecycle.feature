@@ -22,6 +22,7 @@ Feature: Safely manage and undo imported curriculum criteria
     And I visit the curriculum outcomes page for course "LIFE1"
     And I follow "Import from JSON"
     And I set the field "Or paste JSON" to "{\"metadata\":{\"name\":\"Lifecycle curriculum\",\"type\":\"fp\"},\"resultados\":[{\"codigo\":\"RA1\",\"nombre\":\"Lifecycle result\",\"criterios\":[{\"codigo\":\"RA1.a\",\"nombre\":\"Unused criterion\"},{\"codigo\":\"RA1.b\",\"nombre\":\"Used criterion\"}]}]}"
+    And I set the field "Use an existing Moodle scale (advanced)" to "1"
     And I set the field "Outcome scale" to "Criteria scale"
     And I press "Validate and preview"
     And I press "Confirm import"
