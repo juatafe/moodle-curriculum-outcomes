@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response><status><code>200</code><text>ok</text></status><data><bloque><version>
+<p>Módulo profesional: Módulo con frontera</p>
+<p>Código: TEST02</p>
+<p>Resultados de aprendizaje y criterios de evaluación.</p>
+<p>1. Selecciona elementos para una instalación.</p>
+<p>Criterios de evaluación:</p>
+<p>a) Criterio A.</p>
+<p>b) Criterio B.</p>
+<p><strong>Duración: 175 horas.</strong></p>
+<p><strong>Contenidos básicos.</strong></p>
+<p>Contenido X</p>
+<p><strong>Orientaciones pedagógicas.</strong></p>
+</version></bloque></data></response>

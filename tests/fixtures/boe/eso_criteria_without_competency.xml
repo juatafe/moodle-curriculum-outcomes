@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response><status><code>200</code><text>ok</text></status><data>
+<bloque titulo="ANEXO II"><version>
+<p class="centro_negrita">Materia incompleta</p>
+<p class="centro_redonda">Criterios de evaluación</p>
+<p class="parrafo_2">Competencia específica 1.</p>
+<p class="parrafo_2">1.1 Texto criterio uno</p>
+<p class="parrafo">1.2 Texto criterio dos</p>
+</version></bloque></data></response>

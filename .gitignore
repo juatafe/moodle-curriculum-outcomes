@@ -1,0 +1,9 @@
+/dist/
+/.phpunit.result.cache
+/.phpunit.cache/
+/vendor/
+/node_modules/
+/.env
+*.log
+*.swp
+*~

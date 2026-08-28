@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<documento>
+  <bloque titulo="ANEXO I"><p class="anexo_tit">Título A</p>
+    <p>Módulo profesional: Compartido A</p><p>Código: 1001</p>
+    <p>Resultados de aprendizaje y criterios de evaluación:</p><p>1. Resultado A.</p><p>a) Criterio A.</p>
+  </bloque>
+  <bloque titulo="ANEXO II"><p class="anexo_tit">Título B</p>
+    <p>Módulo profesional: Compartido B</p><p>Código: 1001</p>
+    <p>Resultados de aprendizaje y criterios de evaluación:</p><p>1. Resultado B.</p><p>a) Criterio B.</p>
+  </bloque>
+</documento>

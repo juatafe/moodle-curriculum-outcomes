@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<response><status><code>200</code><text>ok</text></status><data>
+  <bloque titulo="ANEXO I">
+    <p class="anexo_tit">Título A</p>
+    <p>Módulo profesional: Módulo A uno</p><p>Código: 1001</p>
+    <p>Resultados de aprendizaje y criterios de evaluación:</p><p>1. Resultado A.</p><p>a) Criterio A.</p>
+    <p>Módulo profesional: Módulo A dos</p><p>Código: 1002</p>
+    <p>Resultados de aprendizaje y criterios de evaluación:</p><p>1. Resultado A2.</p><p>a) Criterio A2.</p>
+  </bloque>
+  <bloque titulo="ANEXO II">
+    <p class="anexo_tit">Título B</p>
+    <p>Módulo profesional: Módulo B uno</p><p>Código: 2001</p>
+    <p>Resultados de aprendizaje y criterios de evaluación:</p><p>1. Resultado B.</p><p>a) Criterio B.</p>
+    <p>Módulo profesional: Módulo B dos</p><p>Código: 2002</p>
+    <p>Resultados de aprendizaje y criterios de evaluación:</p><p>1. Resultado B2.</p><p>a) Criterio B2.</p>
+  </bloque>
+</data></response>

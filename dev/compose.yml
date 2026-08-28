@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: moodle
+      POSTGRES_USER: moodle
+      POSTGRES_PASSWORD: moodle
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moodle"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  moodle:
+    image: moodlehq/moodle-php-apache:8.3
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    volumes:
+      - ${MOODLE_ROOT}:/var/www/html
+      - ${MOODLE_DATA}:/var/www/moodledata
+      - ${PLUGIN_ROOT}:/var/www/html/public/local/criteriaoutcomes:ro
+

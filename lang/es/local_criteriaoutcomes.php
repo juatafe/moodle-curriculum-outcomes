@@ -1,0 +1,220 @@
+<?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * Spanish language strings.
+ *
+ * @package local_criteriaoutcomes
+ * @copyright 2026 Juan Bautista Talens Felis
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+$string['pluginname'] = 'Criterios de evaluación';
+$string['criteriaoutcomes'] = 'Criterios de evaluación';
+$string['jsonfile'] = 'Archivo JSON';
+$string['jsontext'] = 'O pega el JSON';
+$string['preview'] = 'Validar y previsualizar';
+$string['previewtitle'] = 'Previsualización de la importación';
+$string['selectscale'] = 'Escala de los resultados';
+$string['confirmimport'] = 'Confirmar importación';
+$string['previewexpired'] = 'La vista previa ha caducado. Genérala de nuevo antes de confirmar.';
+$string['noscales'] = 'No se encontró ninguna escala utilizable. Crea una escala de curso en el libro de calificaciones antes de importar.';
+$string['outcomesdisabled'] = 'Los resultados (outcomes) están desactivados. Un administrador debe activar «Habilitar resultados» antes de poder crear o mostrar criterios.';
+$string['opensettings'] = 'Abrir búsqueda de administración';
+$string['statusnew'] = 'NUEVO';
+$string['statusexisting'] = 'EXISTENTE';
+$string['statustext_changed'] = 'TEXTO_CAMBIADO';
+$string['statusscale_changed'] = 'ESCALA_CAMBIADA';
+$string['statustext_and_scale_changed'] = 'TEXTO_Y_ESCALA_CAMBIADOS';
+$string['statusmetadata_changed'] = 'METADATOS_CAMBIADOS';
+$string['statusconflict'] = 'CONFLICTO';
+$string['conflictwarning'] = 'Este nombre corto pertenece a un Outcome sin mapping del plugin. No se modificará ni adoptará.';
+$string['scaleitemsblocked'] = 'Cambio de escala bloqueado: ya existen elementos de calificación que usan este Outcome.';
+$string['scalegradesblocked'] = 'Cambio de escala prohibido: ya existen calificaciones académicas del Outcome.';
+$string['criteriaandevidence'] = 'Criterios y evidencias';
+$string['noevidence'] = 'Todavía no hay evidencias en actividades';
+$string['unnamedcurriculum'] = 'Currículo sin nombre';
+$string['errorjsonsize'] = 'El JSON está vacío o supera el límite de 2 MB.';
+$string['errorinvalidjson'] = 'JSON no válido: {$a}';
+$string['errornoresults'] = 'El JSON debe contener un array resultados no vacío.';
+$string['errorparentstructure'] = 'El agrupador {$a} debe tener nombre y un array criterios no vacío.';
+$string['errorcriterionstructure'] = 'Cada criterio de {$a} debe tener nombre.';
+$string['errorduplicatecode'] = 'El código de criterio {$a} está duplicado.';
+$string['erroremptytext'] = 'Los códigos y nombres no pueden estar vacíos.';
+$string['errorweight'] = 'Los pesos, si se indican, deben ser números no negativos.';
+$string['errorscale'] = 'La escala seleccionada no está disponible en este curso.';
+$string['importcomplete'] = 'Importación completada: {$a->new} nuevos, {$a->existing} sin cambios, {$a->textchanged} textos actualizados, {$a->scalechanged} escalas cambiadas de forma segura, {$a->metadatachanged} metadatos actualizados, {$a->scaleblocked} cambios de escala bloqueados y {$a->conflict} conflictos omitidos.';
+$string['imported'] = 'Importación';
+$string['privacy:metadata'] = 'El plugin guarda la estructura curricular y sus correspondencias con outcomes, pero no datos personales.';
+$string['criteriaoutcomes:view'] = 'Ver criterios de evaluación';
+$string['criteriaoutcomes:import'] = 'Importar criterios de evaluación';
+$string['criteriaoutcomes:manage'] = 'Gestionar criterios de evaluación';
+$string['criteriaoutcomes:mapquiz'] = 'Asignar slots de cuestionario a criterios curriculares';
+$string['criteriaoutcomes:viewquizevidence'] = 'Ver evidencias por criterio de intentos de cuestionario';
+$string['quizcriteriamapping'] = 'Criterios en cuestionarios';
+$string['quizcriteriamappingfor'] = 'Criterios en el cuestionario: {$a}';
+$string['noquizzes'] = 'Este curso no tiene cuestionarios visibles.';
+$string['noquizslots'] = 'Este cuestionario no tiene preguntas.';
+$string['nocriteriaforquiz'] = 'Importe criterios curriculares en el curso antes de configurar el cuestionario.';
+$string['slotheading'] = 'Pregunta {$a->number}: {$a->name}{$a->random}';
+$string['slotinfo'] = 'Tipo: {$a->type}; puntuación máxima: {$a->maxmark}. {$a->text}';
+$string['randomslot'] = 'SLOT ALEATORIO';
+$string['randomwarning'] = 'Este mapping pertenece al slot aleatorio. Toda pregunta seleccionada aportará evidencia a estos criterios; mantenga el conjunto aleatorio curricularmente homogéneo.';
+$string['mappingweight'] = 'Peso de contribución de la pregunta';
+$string['mappingweight_help'] = 'Este peso controla cómo contribuye esta pregunta al criterio dentro de este intento de cuestionario. No cambia el peso curricular del criterio.';
+$string['aggregations'] = 'Combinar preguntas mapeadas';
+$string['aggregations_help'] = '¿Cómo deben combinarse las preguntas mapeadas al mismo criterio dentro de un intento? Esto no calcula el logro global del estudiante en el criterio.';
+$string['aggregationshelp'] = 'Elige cómo combinar dos o más preguntas mapeadas al mismo criterio en este intento. Es evidencia del cuestionario, no el logro global del criterio.';
+$string['aggregationmean'] = 'Media';
+$string['aggregationweightedmean'] = 'Media ponderada';
+$string['savemappings'] = 'Guardar mappings';
+$string['mappingssaved'] = 'Mappings de criterios del cuestionario guardados.';
+$string['quizevidence'] = 'Evidencia criterial del cuestionario';
+$string['attemptlink'] = '{$a->user} — intento {$a->attempt}';
+$string['quizevidencefor'] = '{$a->quiz}: {$a->user}, intento {$a->attempt}';
+$string['criterionresult'] = 'Resultado: {$a} %';
+$string['criterionformula'] = '{$a->method}: {$a->numerator} / {$a->denominator}';
+$string['criterionpending'] = 'Pendiente/incompleto: al menos una pregunta no ha terminado, es inválida o espera corrección manual.';
+$string['fraction'] = 'Fracción';
+$string['pending'] = 'Pendiente';
+$string['noquizevidence'] = 'Este intento no tiene evidencias de criterios mapeados.';
+$string['cleanorphanmappings'] = 'Eliminar asociaciones huérfanas';
+$string['orphanmappingsfound'] = '{$a} asociación(es) apuntan a posiciones que ya no existen.';
+$string['orphansremoved'] = '{$a} asociación(es) huérfana(s) eliminada(s).';
+$string['mystudentprogress'] = 'Mi progreso';
+$string['assesscriteria'] = 'Evaluar criterios curriculares';
+$string['assessmentmode'] = 'Modo de evaluación';
+$string['feedbackonly'] = 'Solo retroalimentación';
+$string['valueonly'] = 'Solo valor';
+$string['valueandfeedback'] = 'Valor y retroalimentación';
+$string['saveassessment'] = 'Guardar evaluación';
+$string['releaseassessment'] = 'Publicar';
+$string['assessmentfor'] = '{$a->criterion}: evaluación de {$a->student}';
+$string['scalevalue'] = 'Valor de escala';
+$string['feedbacktext'] = 'Retroalimentación';
+$string['coursegrade'] = 'Calificación Moodle del curso: {$a}';
+$string['criterionweight'] = 'peso {$a}';
+$string['progresscounts'] = '{$a->evidence} evidencias; {$a->feedback} comentarios; {$a->unread} sin leer';
+$string['criterionevidence'] = 'Evidencia del criterio';
+$string['managecurriculum'] = 'Gestionar currículo';
+$string['importcurriculum'] = 'Importar currículo';
+$string['importfromboe'] = 'Importar desde BOE';
+$string['importhistory'] = 'Historial de importación';
+$string['showarchived'] = 'Mostrar archivados';
+$string['hidearchived'] = 'Ocultar archivados';
+$string['archived'] = 'Archivado';
+$string['active'] = 'Activo';
+$string['unarchive'] = 'Restaurar';
+$string['criterionrestored'] = 'El criterio vuelve a estar activo.';
+$string['restorearchived'] = 'Restaurar criterios archivados';
+$string['unarchivecriterion'] = 'Restaurar {$a}';
+$string['impactpreview'] = 'Vista previa del impacto';
+$string['analyseimpact'] = 'Analizar impacto';
+$string['applysafeoperation'] = 'Aplicar operación segura';
+$string['archiveusedconfirm'] = 'Archivar los criterios usados en lugar de dejarlos sin cambios.';
+$string['deletewarning'] = 'Los criterios sin uso y propiedad del plugin pueden eliminarse definitivamente. Los que tengan uso académico solo pueden archivarse.';
+$string['deleteapplysummary'] = 'Operación completada: {$a->deleted} eliminados, {$a->archived} archivados y {$a->blocked} sin cambios.';
+$string['policy'] = 'Política';
+$string['impact'] = 'Uso detectado';
+$string['curriculum'] = 'Currículo';
+$string['criterion'] = 'Criterio';
+$string['status'] = 'Estado';
+$string['actions'] = 'Acciones';
+$string['provider'] = 'Proveedor';
+$string['source'] = 'Fuente';
+$string['user'] = 'Usuario';
+$string['anonymoususer'] = 'Usuario anónimo/eliminado';
+$string['batchdetail'] = 'Lote de importación #{$a}';
+$string['entity'] = 'Entidad';
+$string['action'] = 'Acción';
+$string['safeundo'] = 'Analizar deshacer seguro';
+$string['undopreview'] = 'Vista previa de deshacer seguro';
+$string['confirmundo'] = 'Confirmar deshacer seguro';
+$string['undosummary'] = 'Deshacer completado: {$a->deleted} eliminados, {$a->archived} archivados, {$a->restored} restaurados, {$a->matched} coincidencias conservadas y {$a->conflicted} conflictos conservados.';
+$string['boeimport'] = 'Importar currículo oficial del BOE';
+$string['boedisclaimer'] = 'Fuente: datos abiertos oficiales de legislación consolidada de AEBOE. El texto consolidado tiene carácter informativo. Verifica siempre la publicación oficial aplicable y el currículo autonómico.';
+$string['boesearchlabel'] = 'Identificador BOE o texto de búsqueda';
+$string['boesearchresults'] = 'Resultados de fuentes oficiales';
+$string['boepublicationdate'] = 'Publicado: {$a}';
+$string['boelastupdate'] = 'Última actualización consolidada: {$a}';
+$string['educationfamily'] = 'Familia educativa';
+$string['bachillerato'] = 'Bachillerato';
+$string['loadcurricula'] = 'Cargar currículos';
+$string['selectcurriculum'] = 'Seleccionar módulo, materia o tramo de cursos';
+$string['nocurriculafound'] = 'No se ha podido extraer determinísticamente ningún currículo de esta fuente y familia.';
+$string['selectatleastone'] = 'Selecciona al menos un criterio para importar.';
+$string['statusremoved_from_source'] = 'ELIMINADO_DE_LA_FUENTE';
+$string['eventcurriculumimported'] = 'Currículo importado';
+$string['eventcurriculumupdated'] = 'Currículo actualizado';
+$string['eventcurriculumarchived'] = 'Criterios curriculares archivados';
+$string['eventcurriculumdeleted'] = 'Criterios curriculares eliminados';
+$string['eventimportundone'] = 'Importación curricular deshecha';
+$string['existingscales'] = 'Escalas Moodle existentes';
+$string['recommendedscales'] = 'Escalas recomendadas de Resultados Curriculares';
+$string['createscaletemplate'] = 'Crear para este curso';
+$string['scaletemplatenumericname'] = 'Resultados Curriculares — 0–10';
+$string['scaletemplateachievementname'] = 'Resultados Curriculares — Logro (5 niveles)';
+$string['scaletemplatecreated'] = 'La escala recomendada del curso está preparada.';
+$string['scaletemplatehelp'] = 'Esta escala ordinal valora criterios curriculares. No modifica automáticamente las notas de actividades, la nota del curso ni la agregación del libro de calificaciones.';
+$string['errorscaletemplateconflict'] = 'La escala propiedad del plugin ya no coincide con su plantilla y no se ha modificado.';
+$string['scalelevelinsufficient'] = 'Insuficiente';
+$string['scalelevelsufficient'] = 'Suficiente';
+$string['scalelevelgood'] = 'Bien';
+$string['scalelevelverygood'] = 'Notable';
+$string['scalelevelexcellent'] = 'Excelente';
+$string['importfromjson'] = 'Importar desde JSON';
+$string['jsonimport'] = 'Importar currículo desde JSON';
+$string['qualification'] = 'Título de FP';
+$string['qualificationunknown'] = 'Título no identificado en la fuente';
+$string['courseband'] = 'Curso o tramo';
+$string['coursebandunknown'] = 'Todos los cursos';
+$string['createsandselectscale'] = 'Crear y seleccionar';
+$string['scaleavailabletemplate'] = 'Plantilla disponible';
+$string['scaleavailablecourse'] = 'Disponible en este curso';
+$string['importcurriculum'] = 'Importar currículo';
+$string['assessmentmappings'] = 'Evaluación y mapeos';
+$string['currentcurriculum'] = 'Currículo actual';
+$string['privacy:metadata:assessment:userid'] = 'Usuario evaluado';
+$string['privacy:metadata:assessment:graderid'] = 'Usuario evaluador';
+$string['privacy:metadata:assessment:feedback'] = 'Retroalimentación de la evaluación';
+$string['privacy:metadata:checklistresp:userid'] = 'Usuario al que pertenece la respuesta de la lista';
+$string['privacy:metadata:checklistresp:graderid'] = 'Usuario evaluador de la lista';
+$string['privacy:metadata:checklistresp:feedback'] = 'Retroalimentación de la respuesta de la lista';
+$string['privacy:metadata:judgement:userid'] = 'Usuario evaluado por el juicio';
+$string['privacy:metadata:judgement:graderid'] = 'Usuario que emitió el juicio';
+$string['privacy:metadata:judgement:comment'] = 'Comentario del juicio';
+$string['privacy:metadata:feedbackread:userid'] = 'Usuario que leyó la retroalimentación';
+$string['feedbacklabel'] = 'Retroalimentación';
+$string['manageinstruments'] = 'Gestionar instrumentos';
+$string['viewallevidence'] = 'Ver todas las evidencias';
+$string['viewownevidence'] = 'Ver las evidencias propias';
+$string['publishfeedback'] = 'Publicar retroalimentación';
+$string['studentprogress'] = 'Progreso del estudiante';
+$string['teacherprogress'] = 'Progreso del alumnado';
+$string['draft'] = 'Borrador';
+$string['released'] = 'Publicada';
+$string['draftassessment'] = 'Evaluación en borrador';
+$string['selectmode'] = 'Seleccionar modo de evaluación';
+$string['evidencecount'] = 'Evidencias';
+$string['feedbackcount'] = 'Retroalimentaciones';
+$string['unreadcount'] = 'Sin leer';
+$string['nocurrentjudgement'] = 'No hay juicio actual';
+$string['currentjudgement'] = 'Juicio actual';
+$string['setjudgement'] = 'Establecer juicio';
+$string['weightnotdefined'] = 'Peso no definido';
+$string['latestlabel'] = 'Última evidencia: {$a}';
+$string['privacy:metadata:importbatch'] = 'Historial de importación curricular y su atribución opcional a una persona usuaria.';
+$string['privacy:metadata:importbatch:userid'] = 'La persona que realizó la importación curricular o la operación de deshacer.';

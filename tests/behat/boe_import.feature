@@ -1,0 +1,119 @@
+@local @local_criteriaoutcomes @javascript
+Feature: Import a controlled official BOE curriculum
+  In order to use official curriculum criteria without trusting arbitrary URLs
+  As an editing teacher
+  I need to search, preview and import through the real BOE user interface
+
+  Background:
+    Given the following config values are set as admin:
+      | enableoutcomes | 1 |
+    And the following "courses" exist:
+      | fullname   | shortname | category |
+      | BOE course | BOE1      | 0        |
+    And the following "users" exist:
+      | username   | firstname | lastname | email                |
+      | boeteacher | BOE       | Teacher  | boe@example.com      |
+    And the following "course enrolments" exist:
+      | user       | course | role           |
+      | boeteacher | BOE1   | editingteacher |
+    And the course "BOE1" has the outcome scale "Criteria scale"
+    And the controlled BOE curriculum fixture is available
+    And I log in as "boeteacher"
+    And I am on "BOE course" course homepage
+
+  Scenario: An editing teacher imports selected criteria from a controlled BOE source
+    Given I visit the curriculum outcomes page for course "BOE1"
+    And I follow "Import from BOE"
+    When I set the field "BOE identifier or search text" to "BOE-A-2026-1"
+    And I press "Search"
+    Then I should see "Norma curricular Behat controlada"
+    And I should see "BOE-A-2026-1"
+    And the field "Education family" matches value ""
+    When I set the field "Education family" to "FP"
+    And I press "Load curricula"
+    And I set the field "FP qualification / title" to "Qualification not identified in the source"
+    And I press "Continue"
+    Then I should see "Módulo Behat controlado"
+    When I set the field "Curriculum" to "TEST01 — Módulo Behat controlado"
+    And I set the field "Outcome scale" to "Criteria scale"
+    And I submit the BOE "preview" action
+    Then I should see "RA1 — Realiza el primer resultado de aprendizaje."
+    And I should see "RA1.a"
+    And I should see "RA1.b"
+    And I should see "RA2.a"
+    And I should see "NEW"
+    And I should not see "Duración: 175 horas."
+    And I should not see "Contenidos básicos."
+    And I should not see "Orientaciones pedagógicas."
+    When I press "Confirm import"
+    Then I should see "Import complete: 3 new, 0 unchanged"
+    When I visit the curriculum outcomes page for course "BOE1"
+    Then I should see "Criterio A sin uso."
+    And I should see "Criterio B susceptible de uso académico."
+    And I should see "Criterio del segundo resultado."
+
+  Scenario: Reimporting the same controlled BOE curriculum is idempotent
+    Given I visit the curriculum outcomes page for course "BOE1"
+    And I follow "Import from BOE"
+    And I set the field "BOE identifier or search text" to "BOE-A-2026-1"
+    And I press "Search"
+    And I set the field "Education family" to "FP"
+    And I press "Load curricula"
+    And I set the field "FP qualification / title" to "Qualification not identified in the source"
+    And I press "Continue"
+    And I set the field "Curriculum" to "TEST01 — Módulo Behat controlado"
+    And I set the field "Outcome scale" to "Criteria scale"
+    And I submit the BOE "preview" action
+    And I press "Confirm import"
+    When I visit the curriculum outcomes page for course "BOE1"
+    And I follow "Import from BOE"
+    And I set the field "BOE identifier or search text" to "BOE-A-2026-1"
+    And I press "Search"
+    And I set the field "Education family" to "FP"
+    And I press "Load curricula"
+    And I set the field "FP qualification / title" to "Qualification not identified in the source"
+    And I press "Continue"
+    And I set the field "Curriculum" to "TEST01 — Módulo Behat controlado"
+    And I set the field "Outcome scale" to "Criteria scale"
+    And I submit the BOE "preview" action
+    Then I should see "RA1.a"
+    And I should see "RA1.b"
+    And I should see "RA2.a"
+    And I should see "EXISTING"
+    When I press "Confirm import"
+    Then I should see "Import complete: 0 new, 3 unchanged"
+    And course "BOE1" should have exactly "1" criterion "RA1.a" with status "active"
+    And course "BOE1" should have exactly "1" criterion "RA1.b" with status "active"
+    And course "BOE1" should have exactly "1" criterion "RA2.a" with status "active"
+    And course "BOE1" should have "1" framework and "2" parents
+
+  Scenario: ESO preview keeps competency text distinct from criterion text
+    Given I visit the curriculum outcomes page for course "BOE1"
+    And I follow "Import from BOE"
+    When I set the field "BOE identifier or search text" to "BOE-A-2026-2"
+    And I press "Search"
+    Then I should see "Enseñanzas mínimas de la Educación Secundaria Obligatoria"
+    And the field "Education family" matches value "eso"
+    When I press "Load curricula"
+    And I set the field "Course / course band" to "Cursos de primero a tercero"
+    And I press "Continue"
+    And I set the field "Curriculum" to "Tecnología y Digitalización"
+    And I set the field "Outcome scale" to "Criteria scale"
+    And I submit the BOE "preview" action
+    Then I should see "CE1 — Texto real de competencia específica"
+    And I should see "1.1 — Texto criterio uno"
+    And I should see "1.2 — Texto criterio dos"
+
+  Scenario: FP qualification selection filters modules from another title
+    Given I visit the curriculum outcomes page for course "BOE1"
+    And I follow "Import from BOE"
+    When I set the field "BOE identifier or search text" to "BOE-A-2026-3"
+    And I press "Search"
+    And I set the field "Education family" to "FP"
+    And I press "Load curricula"
+    And I set the field "FP qualification / title" to "Título A"
+    And I press "Continue"
+    Then I should see "1001 — Módulo A uno"
+    And I should see "1002 — Módulo A dos"
+    And I should not see "2001 — Módulo B uno"
+    And I should not see "2002 — Módulo B dos"

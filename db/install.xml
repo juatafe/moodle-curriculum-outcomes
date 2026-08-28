@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/criteriaoutcomes/db" VERSION="2026082801" COMMENT="Curriculum Outcomes tables">
+  <TABLES>
+    <TABLE NAME="local_crout_framework" COMMENT="Curricula imported into courses">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="other"/>
+        <FIELD NAME="source" TYPE="char" LENGTH="255" NOTNULL="false"/>
+        <FIELD NAME="sourceid" TYPE="char" LENGTH="255" NOTNULL="false"/>
+        <FIELD NAME="sourceurl" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="version" TYPE="char" LENGTH="100" NOTNULL="false"/>
+        <FIELD NAME="language" TYPE="char" LENGTH="20" NOTNULL="false"/>
+        <FIELD NAME="checksum" TYPE="char" LENGTH="64" NOTNULL="false"/>
+        <FIELD NAME="identitykey" TYPE="char" LENGTH="64" NOTNULL="true"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="json"/>
+        <FIELD NAME="sourcetitle" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="sourceref" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="sourcelastupdate" TYPE="char" LENGTH="40" NOTNULL="false"/>
+        <FIELD NAME="retrievedat" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="parserversion" TYPE="char" LENGTH="50" NOTNULL="false"/>
+        <FIELD NAME="curriculumkey" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="legacy"/>
+        <FIELD NAME="educationlevel" TYPE="char" LENGTH="50" NOTNULL="false"/>
+        <FIELD NAME="qualification" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="subjectmodule" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="modulecode" TYPE="char" LENGTH="100" NOTNULL="false"/>
+        <FIELD NAME="provenance" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="sourcestatus" TYPE="char" LENGTH="30" NOTNULL="true" DEFAULT="up_to_date"/>
+        <FIELD NAME="sourcecheckedat" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="archived" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/></KEYS>
+      <INDEXES><INDEX NAME="courseidentity" UNIQUE="true" FIELDS="courseid, identitykey"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_parent" COMMENT="Conceptual RA or CE groups">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="frameworkid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="name" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="weight" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="false"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="sourcekey" TYPE="char" LENGTH="64" NOTNULL="false"/>
+        <FIELD NAME="archived" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="frameworkfk" TYPE="foreign" FIELDS="frameworkid" REFTABLE="local_crout_framework" REFFIELDS="id"/></KEYS>
+      <INDEXES><INDEX NAME="frameworkcode" UNIQUE="true" FIELDS="frameworkid, code"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_criterion" COMMENT="Criteria mapped to Moodle outcomes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="100" NOTNULL="true"/>
+        <FIELD NAME="name" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="weight" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="false"/>
+        <FIELD NAME="outcomeid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="sourcekey" TYPE="char" LENGTH="64" NOTNULL="false"/>
+        <FIELD NAME="outcomeowned" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="archived" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+      </FIELDS>
+      <KEYS><KEY NAME="primary" TYPE="primary" FIELDS="id"/><KEY NAME="parentfk" TYPE="foreign" FIELDS="parentid" REFTABLE="local_crout_parent" REFFIELDS="id"/></KEYS>
+      <INDEXES><INDEX NAME="parentcode" UNIQUE="true" FIELDS="parentid, code"/><INDEX NAME="outcomeidx" UNIQUE="false" FIELDS="outcomeid"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_quizcfg" COMMENT="Aggregation configured for one criterion in one quiz">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="criterionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="aggregation" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="mean"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="quizfk" TYPE="foreign" FIELDS="quizid" REFTABLE="quiz" REFFIELDS="id"/>
+        <KEY NAME="criterionfk" TYPE="foreign" FIELDS="criterionid" REFTABLE="local_crout_criterion" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="quizcriterion" UNIQUE="true" FIELDS="quizid, criterionid"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_quizmap" COMMENT="Quiz slot mappings to curriculum criteria">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="slotid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="criterionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="weight" TYPE="number" LENGTH="12" DECIMALS="7" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="quizfk" TYPE="foreign" FIELDS="quizid" REFTABLE="quiz" REFFIELDS="id"/>
+        <KEY NAME="slotfk" TYPE="foreign" FIELDS="slotid" REFTABLE="quiz_slots" REFFIELDS="id"/>
+        <KEY NAME="criterionfk" TYPE="foreign" FIELDS="criterionid" REFTABLE="local_crout_criterion" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="quizslotcriterion" UNIQUE="true" FIELDS="quizid, slotid, criterionid"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_assessment" COMMENT="Teacher assessments of criterion evidence">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="criterionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="sourcetype" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="sourceinstanceid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="assessmentmode" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="value" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="false"/>
+        <FIELD NAME="scalevalue" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="feedback" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="feedbackformat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="instrumenttype" TYPE="char" LENGTH="20" NOTNULL="false"/>
+        <FIELD NAME="instrumentinstanceid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="draft"/>
+        <FIELD NAME="graderid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timepublished" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="criterionfk" TYPE="foreign" FIELDS="criterionid" REFTABLE="local_crout_criterion" REFFIELDS="id"/>
+        <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="graderfk" TYPE="foreign" FIELDS="graderid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="criterionuser" UNIQUE="false" FIELDS="criterionid, userid"/>
+        <INDEX NAME="coursecriterion" UNIQUE="false" FIELDS="courseid, criterionid"/>
+        <INDEX NAME="sourceref" UNIQUE="false" FIELDS="sourcetype, sourceid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_rubricmap" COMMENT="Maps rubric dimensions to curriculum criteria">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="rubriccriterionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="curriculumcriterionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="weight" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="currcritfk" TYPE="foreign" FIELDS="curriculumcriterionid" REFTABLE="local_crout_criterion" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="rubriccrit" UNIQUE="true" FIELDS="rubriccriterionid, curriculumcriterionid"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_checklist_def" COMMENT="Checklist definitions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="descriptionformat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="itemmode" TYPE="char" LENGTH="12" NOTNULL="true" DEFAULT="binary"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_crout_checklist_item" COMMENT="Checklist items">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="definitionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="name" TYPE="text" NOTNULL="true"/>
+        <FIELD NAME="sortorder" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="weight" TYPE="number" LENGTH="10" DECIMALS="5" NOTNULL="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="deffk" TYPE="foreign" FIELDS="definitionid" REFTABLE="local_crout_checklist_def" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_crout_checklist_map" COMMENT="Checklist item to curriculum criterion mapping">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="criterionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="itemfk" TYPE="foreign" FIELDS="itemid" REFTABLE="local_crout_checklist_item" REFFIELDS="id"/>
+        <KEY NAME="criterionfk" TYPE="foreign" FIELDS="criterionid" REFTABLE="local_crout_criterion" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="itemcriterion" UNIQUE="true" FIELDS="itemid, criterionid"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_checklist_resp" COMMENT="Checklist responses per user">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="definitionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="state" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="not_done"/>
+        <FIELD NAME="feedback" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="feedbackformat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="graderid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="deffk" TYPE="foreign" FIELDS="definitionid" REFTABLE="local_crout_checklist_def" REFFIELDS="id"/>
+        <KEY NAME="itemfk" TYPE="foreign" FIELDS="itemid" REFTABLE="local_crout_checklist_item" REFFIELDS="id"/>
+        <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="graderfk" TYPE="foreign" FIELDS="graderid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="defitemuser" UNIQUE="true" FIELDS="definitionid, itemid, userid"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_judgement" COMMENT="Manual current judgement per criterion per student">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="criterionid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="scalevalue" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="comment" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="commentformat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+        <FIELD NAME="graderid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="criterionfk" TYPE="foreign" FIELDS="criterionid" REFTABLE="local_crout_criterion" REFFIELDS="id"/>
+        <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="graderfk" TYPE="foreign" FIELDS="graderid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="criterionuser" UNIQUE="true" FIELDS="criterionid, userid"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_feedback_read" COMMENT="Read tracking for released assessments">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="assessmentid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timeread" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="assessfk" TYPE="foreign" FIELDS="assessmentid" REFTABLE="local_crout_assessment" REFFIELDS="id"/>
+        <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="assessuser" UNIQUE="true" FIELDS="assessmentid, userid"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_importbatch" COMMENT="Course curriculum import audit batches">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="frameworkid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="30" NOTNULL="true"/>
+        <FIELD NAME="sourceid" TYPE="char" LENGTH="255" NOTNULL="false"/>
+        <FIELD NAME="curriculumkey" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="operation" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="import"/>
+        <FIELD NAME="checksum" TYPE="char" LENGTH="64" NOTNULL="true"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="pending"/>
+        <FIELD NAME="summary" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="coursefk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="frameworkfk" TYPE="foreign" FIELDS="frameworkid" REFTABLE="local_crout_framework" REFFIELDS="id"/>
+        <KEY NAME="userfk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="coursecreated" UNIQUE="false" FIELDS="courseid, timecreated"/></INDEXES>
+    </TABLE>
+    <TABLE NAME="local_crout_importitem" COMMENT="Per-entity curriculum import audit actions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="batchid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="entitytype" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="entityid" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="sourcekey" TYPE="char" LENGTH="64" NOTNULL="true"/>
+        <FIELD NAME="action" TYPE="char" LENGTH="20" NOTNULL="true"/>
+        <FIELD NAME="previousdata" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="newdata" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="applied"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="batchfk" TYPE="foreign" FIELDS="batchid" REFTABLE="local_crout_importbatch" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES><INDEX NAME="batchsource" UNIQUE="false" FIELDS="batchid, sourcekey"/></INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

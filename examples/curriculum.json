@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "name": "Sistemas Operativos",
+    "type": "fp",
+    "source": "BOE",
+    "source_id": "example",
+    "version": "1"
+  },
+  "resultados": [
+    {
+      "codigo": "RA1",
+      "nombre": "Configura sistemas operativos",
+      "peso": null,
+      "criterios": [
+        {"codigo": "RA1.a", "nombre": "Instala el sistema operativo", "peso": null},
+        {"codigo": "RA1.b", "nombre": "Documenta la configuración", "peso": null},
+        {"codigo": "RA1.c", "nombre": "Verifica el funcionamiento del sistema", "peso": null}
+      ]
+    }
+  ]
+}

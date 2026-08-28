@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response><status><code>200</code><text>ok</text></status><data><bloque><version>
+<p>Módulo profesional: Módulo Behat controlado</p>
+<p>Código: TEST01</p>
+<p>Resultados de aprendizaje y criterios de evaluación.</p>
+<p>1. Realiza el primer resultado de aprendizaje.</p>
+<p>Criterios de evaluación:</p>
+<p>a) Criterio A sin uso.</p>
+<p>b) Criterio B susceptible de uso académico.</p>
+<p>2. Realiza el segundo resultado de aprendizaje.</p>
+<p>Criterios de evaluación:</p>
+<p>a) Criterio del segundo resultado.</p>
+<p><strong>Duración: 175 horas.</strong></p>
+<p><strong>Contenidos básicos.</strong></p>
+<p>Contenido que no es criterio.</p>
+<p><strong>Orientaciones pedagógicas.</strong></p>
+</version></bloque></data></response>

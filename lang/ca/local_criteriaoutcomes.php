@@ -1,0 +1,220 @@
+<?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * Catalan language strings.
+ *
+ * @package local_criteriaoutcomes
+ * @copyright 2026 Juan Bautista Talens Felis
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+$string['pluginname'] = 'Criteris d’avaluació';
+$string['criteriaoutcomes'] = 'Criteris d’avaluació';
+$string['jsonfile'] = 'Fitxer JSON';
+$string['jsontext'] = 'O enganxa el JSON';
+$string['preview'] = 'Validar i previsualitzar';
+$string['previewtitle'] = 'Previsualització de la importació';
+$string['selectscale'] = 'Escala dels resultats';
+$string['confirmimport'] = 'Confirma la importació';
+$string['previewexpired'] = "La vista prèvia ha caducat. Genera-la de nou abans de confirmar.";
+$string['noscales'] = 'No s’ha trobat cap escala utilitzable. Crea una escala de curs al llibre de qualificacions.';
+$string['outcomesdisabled'] = 'Els resultats (outcomes) estan desactivats. Un administrador ha d’activar «Habilita els resultats».';
+$string['opensettings'] = 'Obri la cerca d’administració';
+$string['statusnew'] = 'NOU';
+$string['statusexisting'] = 'EXISTENT';
+$string['statustext_changed'] = 'TEXT_CANVIAT';
+$string['statusscale_changed'] = 'ESCALA_CANVIADA';
+$string['statustext_and_scale_changed'] = 'TEXT_I_ESCALA_CANVIATS';
+$string['statusmetadata_changed'] = 'METADADES_CANVIADES';
+$string['statusconflict'] = 'CONFLICTE';
+$string['conflictwarning'] = 'Este nom curt pertany a un Outcome sense mapping del plugin. No es modificarà ni adoptarà.';
+$string['scaleitemsblocked'] = 'Canvi d’escala bloquejat: ja hi ha elements de qualificació que usen este Outcome.';
+$string['scalegradesblocked'] = 'Canvi d’escala prohibit: ja hi ha qualificacions acadèmiques de l’Outcome.';
+$string['criteriaandevidence'] = 'Criteris i evidències';
+$string['noevidence'] = 'Encara no hi ha evidències en activitats';
+$string['unnamedcurriculum'] = 'Currículum sense nom';
+$string['errorjsonsize'] = 'El JSON està buit o supera el límit de 2 MB.';
+$string['errorinvalidjson'] = 'JSON no vàlid: {$a}';
+$string['errornoresults'] = 'El JSON ha de contindre un array resultados no buit.';
+$string['errorparentstructure'] = 'L’agrupador {$a} ha de tindre nom i un array criterios no buit.';
+$string['errorcriterionstructure'] = 'Cada criteri de {$a} ha de tindre nom.';
+$string['errorduplicatecode'] = 'El codi de criteri {$a} està duplicat.';
+$string['erroremptytext'] = 'Els codis i noms no poden estar buits.';
+$string['errorweight'] = 'Els pesos, si s’indiquen, han de ser números no negatius.';
+$string['errorscale'] = 'L’escala seleccionada no està disponible en este curs.';
+$string['importcomplete'] = 'Importació completada: {$a->new} nous, {$a->existing} sense canvis, {$a->textchanged} textos actualitzats, {$a->scalechanged} escales canviades de forma segura, {$a->metadatachanged} metadades actualitzades, {$a->scaleblocked} canvis d’escala bloquejats i {$a->conflict} conflictes omesos.';
+$string['imported'] = 'Importació';
+$string['privacy:metadata'] = 'El plugin guarda l’estructura curricular i les correspondències amb outcomes, però no dades personals.';
+$string['criteriaoutcomes:view'] = 'Veure criteris d’avaluació';
+$string['criteriaoutcomes:import'] = 'Importar criteris d’avaluació';
+$string['criteriaoutcomes:manage'] = 'Gestionar criteris d’avaluació';
+$string['criteriaoutcomes:mapquiz'] = 'Assignar slots de qüestionari a criteris curriculars';
+$string['criteriaoutcomes:viewquizevidence'] = 'Veure evidències per criteri dels intents de qüestionari';
+$string['quizcriteriamapping'] = 'Criteris en qüestionaris';
+$string['quizcriteriamappingfor'] = 'Criteris en el qüestionari: {$a}';
+$string['noquizzes'] = 'Aquest curs no té qüestionaris visibles.';
+$string['noquizslots'] = 'Aquest qüestionari no té preguntes.';
+$string['nocriteriaforquiz'] = 'Importeu criteris curriculars al curs abans de configurar el qüestionari.';
+$string['slotheading'] = 'Pregunta {$a->number}: {$a->name}{$a->random}';
+$string['slotinfo'] = 'Tipus: {$a->type}; puntuació màxima: {$a->maxmark}. {$a->text}';
+$string['randomslot'] = 'SLOT ALEATORI';
+$string['randomwarning'] = 'Aquest mapping pertany al slot aleatori. Tota pregunta seleccionada aportarà evidència a aquests criteris; manteniu el conjunt aleatori curricularment homogeni.';
+$string['mappingweight'] = 'Pes de contribució de la pregunta';
+$string['mappingweight_help'] = 'Aquest pes controla com contribueix la pregunta al criteri dins d’aquest intent de qüestionari. No canvia el pes curricular del criteri.';
+$string['aggregations'] = 'Combina preguntes mapades';
+$string['aggregations_help'] = 'Com s’han de combinar les preguntes mapades al mateix criteri dins d’un intent? Això no calcula l’assoliment global de l’estudiant en el criteri.';
+$string['aggregationshelp'] = 'Tria com combinar dues o més preguntes mapades al mateix criteri en aquest intent. És evidència del qüestionari, no l’assoliment global del criteri.';
+$string['aggregationmean'] = 'Mitjana';
+$string['aggregationweightedmean'] = 'Mitjana ponderada';
+$string['savemappings'] = 'Desar mappings';
+$string['mappingssaved'] = 'Mappings de criteris del qüestionari desats.';
+$string['quizevidence'] = 'Evidència criterial del qüestionari';
+$string['attemptlink'] = '{$a->user} — intent {$a->attempt}';
+$string['quizevidencefor'] = '{$a->quiz}: {$a->user}, intent {$a->attempt}';
+$string['criterionresult'] = 'Resultat: {$a} %';
+$string['criterionformula'] = '{$a->method}: {$a->numerator} / {$a->denominator}';
+$string['criterionpending'] = 'Pendent/incomplet: almenys una pregunta no ha acabat, és invàlida o espera correcció manual.';
+$string['fraction'] = 'Fracció';
+$string['pending'] = 'Pendent';
+$string['noquizevidence'] = 'Aquest intent no té evidències de criteris mapats.';
+$string['cleanorphanmappings'] = 'Elimina les associacions òrfenes';
+$string['orphanmappingsfound'] = '{$a} associació(ns) apunten a posicions que ja no existeixen.';
+$string['orphansremoved'] = '{$a} associació(ns) òrfena(es) eliminada(es).';
+$string['mystudentprogress'] = 'El meu progrés';
+$string['assesscriteria'] = 'Avaluar criteris curriculars';
+$string['assessmentmode'] = 'Mode d’avaluació';
+$string['feedbackonly'] = 'Només retroacció';
+$string['valueonly'] = 'Només valor';
+$string['valueandfeedback'] = 'Valor i retroacció';
+$string['saveassessment'] = 'Desar avaluació';
+$string['releaseassessment'] = 'Publicar';
+$string['assessmentfor'] = '{$a->criterion}: avaluació de {$a->student}';
+$string['scalevalue'] = 'Valor d’escala';
+$string['feedbacktext'] = 'Retroacció';
+$string['coursegrade'] = 'Qualificació Moodle del curs: {$a}';
+$string['criterionweight'] = 'pes {$a}';
+$string['progresscounts'] = '{$a->evidence} evidències; {$a->feedback} retroaccions; {$a->unread} sense llegir';
+$string['criterionevidence'] = 'Evidència del criteri';
+$string['managecurriculum'] = 'Gestionar el currículum';
+$string['importcurriculum'] = 'Importar currículum';
+$string['importfromboe'] = 'Importar des del BOE';
+$string['importhistory'] = "Historial d'importació";
+$string['showarchived'] = 'Mostrar arxivats';
+$string['hidearchived'] = 'Ocultar arxivats';
+$string['archived'] = 'Arxivat';
+$string['active'] = 'Actiu';
+$string['unarchive'] = 'Restaurar';
+$string['criterionrestored'] = 'El criteri torna a estar actiu.';
+$string['restorearchived'] = 'Restaurar criteris arxivats';
+$string['unarchivecriterion'] = 'Restaurar {$a}';
+$string['impactpreview'] = "Vista prèvia de l'impacte";
+$string['analyseimpact'] = 'Analitzar impacte';
+$string['applysafeoperation'] = 'Aplicar operació segura';
+$string['archiveusedconfirm'] = 'Arxivar els criteris usats en lloc de deixar-los sense canvis.';
+$string['deletewarning'] = "Els criteris sense ús i propietat del connector poden eliminar-se definitivament. Els que tinguen ús acadèmic només poden arxivar-se.";
+$string['deleteapplysummary'] = 'Operació completada: {$a->deleted} eliminats, {$a->archived} arxivats i {$a->blocked} sense canvis.';
+$string['policy'] = 'Política';
+$string['impact'] = 'Ús detectat';
+$string['curriculum'] = 'Currículum';
+$string['criterion'] = 'Criteri';
+$string['status'] = 'Estat';
+$string['actions'] = 'Accions';
+$string['provider'] = 'Proveïdor';
+$string['source'] = 'Font';
+$string['user'] = 'Usuari';
+$string['anonymoususer'] = 'Usuari anònim/eliminat';
+$string['batchdetail'] = 'Lot d’importació #{$a}';
+$string['entity'] = 'Entitat';
+$string['action'] = 'Acció';
+$string['safeundo'] = 'Analitzar desfer segur';
+$string['undopreview'] = 'Vista prèvia de desfer segur';
+$string['confirmundo'] = 'Confirmar desfer segur';
+$string['undosummary'] = 'Desfer completat: {$a->deleted} eliminats, {$a->archived} arxivats, {$a->restored} restaurats, {$a->matched} coincidències conservades i {$a->conflicted} conflictes conservats.';
+$string['boeimport'] = 'Importar currículum oficial del BOE';
+$string['boedisclaimer'] = "Font: dades obertes oficials de legislació consolidada de l'AEBOE. El text consolidat té caràcter informatiu. Verifica sempre la publicació oficial aplicable i el currículum autonòmic.";
+$string['boesearchlabel'] = 'Identificador BOE o text de cerca';
+$string['boesearchresults'] = 'Resultats de fonts oficials';
+$string['boepublicationdate'] = 'Publicat: {$a}';
+$string['boelastupdate'] = 'Última actualització consolidada: {$a}';
+$string['educationfamily'] = 'Família educativa';
+$string['bachillerato'] = 'Batxillerat';
+$string['loadcurricula'] = 'Carregar currículums';
+$string['selectcurriculum'] = 'Seleccionar mòdul, matèria o tram de cursos';
+$string['nocurriculafound'] = "No s'ha pogut extraure determinísticament cap currículum d'esta font i família.";
+$string['selectatleastone'] = 'Selecciona almenys un criteri per importar.';
+$string['statusremoved_from_source'] = 'ELIMINAT_DE_LA_FONT';
+$string['eventcurriculumimported'] = 'Currículum importat';
+$string['eventcurriculumupdated'] = 'Currículum actualitzat';
+$string['eventcurriculumarchived'] = 'Criteris curriculars arxivats';
+$string['eventcurriculumdeleted'] = 'Criteris curriculars eliminats';
+$string['eventimportundone'] = 'Importació curricular desfeta';
+$string['existingscales'] = 'Escales Moodle existents';
+$string['recommendedscales'] = 'Escales recomanades de Resultats Curriculars';
+$string['createscaletemplate'] = 'Crea per a aquest curs';
+$string['scaletemplatenumericname'] = 'Resultats Curriculars — 0–10';
+$string['scaletemplateachievementname'] = 'Resultats Curriculars — Assoliment (5 nivells)';
+$string['scaletemplatecreated'] = 'L’escala recomanada del curs està preparada.';
+$string['scaletemplatehelp'] = 'Aquesta escala ordinal valora criteris curriculars. No modifica automàticament les notes d’activitats, la nota del curs ni l’agregació del llibre de qualificacions.';
+$string['errorscaletemplateconflict'] = 'L’escala propietat del connector ja no coincideix amb la plantilla i no s’ha modificat.';
+$string['scalelevelinsufficient'] = 'Insuficient';
+$string['scalelevelsufficient'] = 'Suficient';
+$string['scalelevelgood'] = 'Bé';
+$string['scalelevelverygood'] = 'Notable';
+$string['scalelevelexcellent'] = 'Excel·lent';
+$string['importfromjson'] = 'Importa des de JSON';
+$string['jsonimport'] = 'Importa el currículum des de JSON';
+$string['qualification'] = 'Títol d’FP';
+$string['qualificationunknown'] = 'Títol no identificat en la font';
+$string['courseband'] = 'Curs o tram';
+$string['coursebandunknown'] = 'Tots els cursos';
+$string['createsandselectscale'] = 'Crea i selecciona';
+$string['scaleavailabletemplate'] = 'Plantilla disponible';
+$string['scaleavailablecourse'] = 'Disponible en aquest curs';
+$string['importcurriculum'] = 'Importa el currículum';
+$string['assessmentmappings'] = 'Avaluació i mapatges';
+$string['currentcurriculum'] = 'Currículum actual';
+$string['privacy:metadata:assessment:userid'] = 'Usuari avaluat';
+$string['privacy:metadata:assessment:graderid'] = 'Usuari avaluador';
+$string['privacy:metadata:assessment:feedback'] = 'Retroacció de l’avaluació';
+$string['privacy:metadata:checklistresp:userid'] = 'Usuari de la resposta de la llista';
+$string['privacy:metadata:checklistresp:graderid'] = 'Usuari avaluador de la llista';
+$string['privacy:metadata:checklistresp:feedback'] = 'Retroacció de la resposta de la llista';
+$string['privacy:metadata:judgement:userid'] = 'Usuari avaluat pel judici';
+$string['privacy:metadata:judgement:graderid'] = 'Usuari que ha emès el judici';
+$string['privacy:metadata:judgement:comment'] = 'Comentari del judici';
+$string['privacy:metadata:feedbackread:userid'] = 'Usuari que ha llegit la retroacció';
+$string['feedbacklabel'] = 'Retroacció';
+$string['manageinstruments'] = 'Gestiona els instruments';
+$string['viewallevidence'] = 'Mostra totes les evidències';
+$string['viewownevidence'] = 'Mostra les evidències pròpies';
+$string['publishfeedback'] = 'Publica la retroacció';
+$string['studentprogress'] = 'Progrés de l’estudiant';
+$string['teacherprogress'] = 'Progrés de l’alumnat';
+$string['draft'] = 'Esborrany';
+$string['released'] = 'Publicada';
+$string['draftassessment'] = 'Avaluació en esborrany';
+$string['selectmode'] = 'Selecciona el mode d’avaluació';
+$string['evidencecount'] = 'Evidències';
+$string['feedbackcount'] = 'Retroaccions';
+$string['unreadcount'] = 'Sense llegir';
+$string['nocurrentjudgement'] = 'No hi ha cap judici actual';
+$string['currentjudgement'] = 'Judici actual';
+$string['setjudgement'] = 'Estableix el judici';
+$string['weightnotdefined'] = 'Pes no definit';
+$string['latestlabel'] = 'Última evidència: {$a}';
+$string['privacy:metadata:importbatch'] = "Historial d'importació curricular i la seua atribució opcional a una persona usuària.";
+$string['privacy:metadata:importbatch:userid'] = "La persona que ha realitzat la importació curricular o l'operació de desfer.";

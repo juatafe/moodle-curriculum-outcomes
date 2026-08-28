@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response><status><code>200</code><text>ok</text></status><data><bloque><version>
+<p>Módulo profesional: Servicios de red</p>
+<p>Código: 0371</p>
+<p>Resultados de aprendizaje y criterios de evaluación.</p>
+<p>1. Configura servicios de nombres.</p>
+<p>a) Se han identificado los escenarios de uso.</p>
+<p>b) Se ha instalado el servicio.</p>
+<p>c) Se ha verificado su funcionamiento.</p>
+<p>2. Administra servicios de transferencia.</p>
+<p>a) Se han creado usuarios.</p>
+<p>b) Se han aplicado permisos.</p>
+</version></bloque></data></response>
