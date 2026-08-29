@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.0-alpha
+
+First external alpha release prepared for Moodle Marketplace evaluation.
+
+### Highlights
+
+- Real Moodle Outcomes: each imported criterion becomes a native course Outcome.
+- JSON curriculum import with mandatory preview and idempotent mapping.
+- Official BOE consolidated-API provider for FP, ESO and Bach curricula.
+- FP title/module and ESO course-band/subject selection hierarchies.
+- Guided import workflow: source, curriculum, valuation, review with reversible navigation.
+- Quiz slot-to-criterion mapping with per-criterion aggregation (mean/weightedmean).
+- Assessment and feedback system with three modes, draft/release states and rubric integration.
+- Checklist instrument with item-criterion mapping and per-item responses.
+- Student progress dashboard with RA/CE hierarchy, evidence counts and unread feedback.
+- Privacy API: full metadata, export and deletion for all user data.
+- Backup/restore: structure, provenance, archive state, import audit and mapped user data.
+- EN, ES, CA, EU, GL language catalogs (EU/GL require human linguistic review).
+- Tested on Moodle 4.5, 5.0 and 5.1 with PostgreSQL and MariaDB.
+
+### Removed
+
+- Duplicate legacy language string definitions for `coursebandunknown` and `importcurriculum`.
+
 ## 0.4.0-dev
 
 - Preserve FP title→module and ESO course-band→subject selection hierarchies from deterministic BOE structure.

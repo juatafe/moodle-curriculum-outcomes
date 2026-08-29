@@ -76,8 +76,11 @@ if (optional_param('confirmimport', 0, PARAM_BOOL)) {
     try {
         $token = required_param('previewtoken', PARAM_ALPHANUM);
         $storedpreview = $SESSION->local_criteriaoutcomes_preview[$token] ?? null;
-        if (!is_array($storedpreview) || ($storedpreview['courseid'] ?? 0) !== $courseid ||
-                !is_array($storedpreview['curriculum'] ?? null)) {
+        if (
+            !is_array($storedpreview)
+            || ($storedpreview['courseid'] ?? 0) !== $courseid
+            || !is_array($storedpreview['curriculum'] ?? null)
+        ) {
             throw new InvalidArgumentException(get_string('previewexpired', 'local_criteriaoutcomes'));
         }
         $curriculum = $storedpreview['curriculum'];

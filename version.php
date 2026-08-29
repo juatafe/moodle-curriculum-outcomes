@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'local_criteriaoutcomes';
-$plugin->version = 2026082801;
+$plugin->version = 2026082901;
 $plugin->requires = 2024100700; // Moodle 4.5.
 $plugin->supported = [405, 501];
 $plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.4.0-dev';
+$plugin->release = '0.4.0-alpha';

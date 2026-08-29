@@ -1,6 +1,6 @@
 # Curriculum Outcomes
 
-`local_criteriaoutcomes` is a development Moodle plugin that imports curriculum criteria as native course Outcomes, maps Quiz slots and native rubric dimensions to criteria, supports direct formative assessment and checklists, and gives students a released-evidence progress view.
+`local_criteriaoutcomes` is a Moodle plugin that imports curriculum criteria as native course Outcomes, maps Quiz slots and native rubric dimensions to criteria, supports direct formative assessment and checklists, and gives students a released-evidence progress view.
 
 It does **not** modify Moodle core or `mod_quiz`, infer aggregation between attempts or activities, convert percentages to Outcome scales, or copy rubric totals into criterion values. Normal activity grades, course grades and Outcome grades remain independent.
 
@@ -8,27 +8,34 @@ It does **not** modify Moodle core or `mod_quiz`, infer aggregation between atte
 
 - Moodle 4.5, 5.0 or 5.1.
 - PHP and database versions supported by the selected Moodle release.
-- Moodle Outcomes enabled.
+- Moodle Outcomes enabled (**Site administration → Grades → General settings → Enable outcomes**).
 
 ## Installation
 
-Install `local_criteriaoutcomes-0.4.0-dev.zip` at **Site administration → Plugins → Install plugins**, or extract it to `local/` (Moodle 4.5/5.0) or `public/local/` (Moodle 5.1). Complete **Site administration → Notifications**. Earlier artifacts remain immutable historical builds.
+Install `local_criteriaoutcomes-0.4.0-alpha.zip` at **Site administration → Plugins → Install plugins**, or extract it to `local/` (Moodle 4.5/5.0) or `public/local/` (Moodle 5.1). Complete **Site administration → Notifications**.
 
-## Quiz criterion evidence
+## Quick start
 
-Open **Curriculum Outcomes → Quiz criteria mapping**, select a course Quiz, then assign each displayed slot to zero, one, or several course criteria. A question contribution weight appears only after that mapping is selected; it is independent of curriculum weights and the question `maxmark`. The mean/weighted-mean choice appears only when two or more questions are already mapped to the same criterion.
+1. Install the plugin and complete notifications.
+2. Enable Moodle Outcomes if not already enabled.
+3. Open a course.
+4. Navigate to **Curriculum Outcomes** in the course navigation.
+5. Import an official curriculum (BOE) or upload a JSON file.
+6. Choose a criterion assessment scale (Achievement 5-level, 0-10, or an existing Moodle scale).
+7. Preview the criteria to import.
+8. Confirm the import.
+9. Map activities or Quiz questions to criteria.
+10. Assess evidence, publish feedback, and track student progress.
 
-The evidence page shows each mapped question's Moodle fraction/state, explicit weight, formula, and result for one attempt. Essays awaiting manual grading produce `Pending`, not zero. Random mappings belong to the slot, so every question in the random set must be pedagogically coherent. See [`docs/QUIZ_CRITERIA.md`](docs/QUIZ_CRITERIA.md).
+## Import from BOE
 
-## Enable Outcomes
+The guided import separates source, curriculum, valuation and review. FP selection preserves **BOE → qualification/title → module → RA → criterion**; ESO preserves **BOE → course band → subject → CE → criterion** when the source states the band deterministically. Every pre-confirmation step has its own back action; valid choices are retained while changing an upstream choice invalidates its derived preview.
 
-Enable **Site administration → Grades → General settings → Enable outcomes**. If disabled, the plugin shows a prerequisite notice and does not import.
+Live extraction is verified for ESO (`BOE-A-2022-4975`) and FP (`BOE-A-2014-5591`).
 
-## Import curriculum
+## Import from JSON
 
-The course home separates import, management, assessment/mappings and the current curriculum. JSON upload/paste has its own **Import from JSON** page; BOE remains a separate flow. Teachers preview, consciously select a global or course scale, import, manage/archive criteria, inspect history and request a conservative undo. Reimporting unchanged data is idempotent. An unrelated Outcome with the same shortname is never adopted or modified.
-
-Flat native Moodle selectors show plugin-owned criteria as `RA1.a — criterion text` or `1.1 — criterion text`. Existing plugin-owned Outcomes are migrated in place; Outcome IDs, grade items and grades are preserved.
+Upload or paste JSON at **Curriculum Outcomes → Import from JSON**. See [`examples/curriculum.json`](examples/curriculum.json). `metadata.name`, a non-empty `resultados` array, and a non-empty `criterios` array per RA/CE are expected. Criterion codes must be unique. Weights are optional non-negative metadata; they are not calculated or required to total 100.
 
 CLI equivalent:
 
@@ -38,41 +45,29 @@ php local/criteriaoutcomes/cli/import.php --courseid=123 --file=curriculum.json 
 
 With Moodle 5.1 the script is below `public/local/`.
 
-## JSON format
-
-See [`examples/curriculum.json`](examples/curriculum.json). `metadata.name`, a non-empty `resultados` array, and a non-empty `criterios` array per RA/CE are expected. Criterion codes must be unique. Weights are optional non-negative metadata; they are not calculated or required to total 100.
-
-## Legacy format
-
-Legacy names prefixed by their codes, such as `RA1.a: Text`, are accepted and normalized without the duplicated prefix.
-
 ## Scales
 
-The valuation choice is never silently preselected. Teachers choose **Achievement (5 levels)**, **0–10**, or an existing Moodle scale as an advanced option. Recommended course-local scales are created or reused transparently. Creation is idempotent, never adopts an external same-name scale and persists labels in the active language. These scales assess criteria; they do not change activity/course grades or gradebook aggregation. See [`docs/SCALES.md`](docs/SCALES.md).
+The valuation choice is never silently preselected. Teachers choose **Achievement (5 levels)**, **0-10**, or an existing Moodle scale as an advanced option. Recommended course-local scales are created or reused transparently. Creation is idempotent, never adopts an external same-name scale and persists labels in the active language. These scales assess criteria; they do not change activity/course grades or gradebook aggregation. See [`docs/SCALES.md`](docs/SCALES.md).
 
-## Guided import
+## Quiz criteria mapping
 
-BOE import separates source, curriculum, valuation and review. Every pre-confirmation step has its own back action; valid title/module, band/subject, valuation and criterion choices are retained, while changing an upstream curriculum choice invalidates its derived preview. Review groups criteria in accessible collapsible RA/CE sections and provides selected counts, select/deselect actions and an explicit **Import N criteria** action. The layout uses fluid Moodle controls and stacked narrow-screen actions.
+Open **Curriculum Outcomes → Quiz criteria mapping**, select a course Quiz, then assign each displayed slot to zero, one, or several course criteria. A question contribution weight appears only after that mapping is selected; it is independent of curriculum weights and the question `maxmark`. The mean/weighted-mean choice appears only when two or more questions are already mapped to the same criterion.
 
-## Import lifecycle and safety
+The evidence page shows each mapped question's Moodle fraction/state, explicit weight, formula, and result for one attempt. Essays awaiting manual grading produce `Pending`, not zero. Random mappings belong to the slot, so every question in the random set must be pedagogically coherent. See [`docs/QUIZ_CRITERIA.md`](docs/QUIZ_CRITERIA.md).
 
-Imports use stable curriculum/source identities, canonical checksums, provenance, batches and per-criterion audit items. Preview exposes additions, changes, conflicts and removals before any mutation. Active views exclude archived criteria unless **Show archived** is requested.
+## Student progress
 
-Hard deletion is allowed only when a plugin-owned criterion has no academic data. Grade items, grades, feedback, assessments or other academic use force archive. External Outcomes and cross-course records are never modified or deleted. Mutation endpoints use POST, sesskey and server-side revalidation. Undo never overwrites a newer change.
-
-A failed import rolls back curriculum, mapping and item writes. One `failed` batch is deliberately retained outside the curriculum transaction as audit history, with no partial import items.
-
-## BOE provider
-
-The official AEBOE consolidated API path is implemented and tested with controlled fixtures. FP selection preserves **BOE → qualification/title → module → RA → criterion**; ESO preserves **BOE → course band → subject → CE → criterion** when the source states the band deterministically. Live extraction is verified for ESO (`BOE-A-2022-4975`) and FP (`BOE-A-2014-5591`). CE text comes from the semantic competency section, while FP assessment headings and later duration/content/guidance sections are excluded.
+Students see their own released progress with RA/CE hierarchy, sibling criteria, evidence counts, feedback and unread state. Official Moodle grades continue to come from the Gradebook independently. See [`docs/STUDENT_PROGRESS.md`](docs/STUDENT_PROGRESS.md).
 
 ## Evidence report
 
 Edit an activity and select one or more criteria in Moodle's native Outcomes section. The plugin report lists activities whose `grade_items.outcomeid` points to each mapped Outcome. It neither creates grades nor copies the activity grade.
 
-## Backup and restore
+## Backup and privacy
 
-Course backup always includes plugin-owned curriculum, provenance, archive state, instrument definitions and import audit batches/items. Failed batches are retained as audit history; correctly failed imports contain no partial items. With user information disabled, batch user IDs restore as `NULL` and assessments, checklist responses, judgements and feedback-read markers are excluded. With user information enabled those records and batch users are restored through Moodle mappings. Restore as a new course is tested. Restore merge into an existing course remains unsupported.
+Course backup always includes plugin-owned curriculum, provenance, archive state, instrument definitions and import audit batches/items. With user information disabled, user-owned assessment data is excluded. With user information enabled, assessments, checklist responses, judgements and feedback-read markers are restored through Moodle mappings. Restore as a new course is tested. Restore merge into an existing course remains unsupported.
+
+The plugin implements the full Moodle Privacy API: metadata, export and deletion for all user data tables (assessments, checklist responses, judgements, feedback read tracking, import attribution).
 
 ## Uninstall behaviour
 
@@ -101,17 +96,23 @@ Every mutating web request also requires login, course context, import capabilit
 - Moodle 5.0.9, PHP 8.3.33, PostgreSQL 16.15.
 - Moodle 5.1.6+, PHP 8.3.33, PostgreSQL 16.15 and MariaDB 11.4.
 
-Tests use valid non-default table prefixes. Moodle prefixes may contain lowercase letters and underscores; a prefix containing digits is rejected by Moodle itself.
-
 ## Known limitations
 
-- Development build: complete controlled external manual QA before production use.
+- This is an alpha release: complete controlled external manual QA before production use.
 - Restore merge into an existing course is not supported as a guaranteed workflow.
 - Assignment remains the native Outcome reference module. Quiz criterion evidence is a separate, tested slot-based integration and does not alter native Outcome controls.
 - The live BOE path is not complete for historical FP rules unavailable through the consolidated API.
 - EU and GL catalogs are complete but still require review by competent human translators.
 - No automatic achievement calculation, cross-evidence weighting or longitudinal analytics.
 
-See [`docs/TESTING.md`](docs/TESTING.md) for reproducible QA and [`CHANGES.md`](CHANGES.md) for the release record.
+## Development and testing
+
+See [`docs/TESTING.md`](docs/TESTING.md) for reproducible QA instructions and [`CHANGES.md`](CHANGES.md) for the release record.
+
+## License
 
 Copyright © Juan Bautista Talens Felis. GNU GPL v3 or later; see [`LICENSE`](LICENSE).
+
+## Issue reporting
+
+Report issues at <https://github.com/juatafe/moodle-curriculum-outcomes/issues>.
