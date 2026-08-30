@@ -14,14 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-/**
- * Capability definitions.
- *
- *  local_criteriaoutcomes
- * @copyright 2026 Juan Bautista Talens Felis
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 $capabilities = [
     'local/criteriaoutcomes:view' => [
@@ -48,7 +40,10 @@ $capabilities = [
         'archetypes' => ['editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
         'clonepermissionsfrom' => 'mod/quiz:viewreports',
     ],
-];
-
     'local/criteriaoutcomes:maprubric' => [
-        'captype' => 'write', 'riskbitmask' => 'RISK_DATALOSS', 'contextlevel' => 'CONTEXT_MODULE', 'archetypes' => [\n          'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],\n        'clonepermissionsfrom' => 'mod/rubric:manage',\n    ],
+        'captype' => 'write', 'riskbitmask' => RISK_DATALOSS, 'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => ['editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],
+        'clonepermissionsfrom' => 'moodle/grade:managegradingforms',
+    ],
+];
+echo "Fixed";
