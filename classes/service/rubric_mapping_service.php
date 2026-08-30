@@ -65,6 +65,20 @@ final class rubric_mapping_service {
     }
 
     /**
+     * Delete a mapping by rubric and curriculum criterion IDs.
+     */
+    public function delete_mapping_by_ids(int $rubriccriterionid, int $curriculumcriterionid): void {
+        global $DB;
+        $record = $DB->get_record('local_crout_rubricmap', [
+            'rubriccriterionid' => $rubriccriterionid,
+            'curriculumcriterionid' => $curriculumcriterionid,
+        ], '*', MUST_EXIST);
+        if ($record) {
+            $DB->delete_records('local_crout_rubricmap', ['id' => $record->id]);
+        }
+    }
+
+    /**
      * Get all mappings for a rubric definition (via its criteria).
      *
      * @param int[] $rubriccriterionids Array of rubric criterion IDs.

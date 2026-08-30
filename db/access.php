@@ -49,3 +49,6 @@ $capabilities = [
         'clonepermissionsfrom' => 'mod/quiz:viewreports',
     ],
 ];
+
+    'local/criteriaoutcomes:maprubric' => [
+        'captype' => 'write', 'riskbitmask' => 'RISK_DATALOSS', 'contextlevel' => 'CONTEXT_MODULE', 'archetypes' => [\n          'editingteacher' => CAP_ALLOW, 'manager' => CAP_ALLOW],\n        'clonepermissionsfrom' => 'mod/rubric:manage',\n    ],
