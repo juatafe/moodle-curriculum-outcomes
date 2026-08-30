@@ -116,10 +116,20 @@ final class guided_import_state {
      */
     public function select_curriculum(array $state, int $index): array {
         $service = new curriculum_selection_service();
-        $available = $service->filter(
-            $state['curricula'],
-            $state['selectiongroup']
-        );
+        if ($state['family'] !== 'fp' && $state['subject'] !== '') {
+            $available = $service->filter_by_subject($state['curricula'], $state['subject']);
+            if ($state['variant'] !== '') {
+                $available = array_filter($available, function ($c) use ($service, $state) {
+                    [$unused, $band] = $service->subject_and_band($c['metadata']['subjectmodule'] ?? '');
+                    return $band === $state['variant'];
+                });
+            }
+        } else {
+            $available = $service->filter(
+                $state['curricula'],
+                $state['selectiongroup']
+            );
+        }
         if (!isset($available[$index])) {
             throw new \invalid_parameter_exception('Invalid curriculum selection.');
         }

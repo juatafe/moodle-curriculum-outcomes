@@ -75,9 +75,23 @@ final class curriculum_selection_service {
      * e.g. "Matemáticas — Cursos primero a tercero" -> "Matemáticas"
      * e.g. "Matemáticas" -> "Matemáticas"
      */
-    private function extract_subject_name(string $subjectmodule): string {
+    public function extract_subject_name(string $subjectmodule): string {
         $parts = preg_split('/\s+—\s+/u', $subjectmodule, 2);
         return trim($parts[0] ?? $subjectmodule);
+    }
+
+    /**
+     * Filter curricula to those matching a subject.
+     */
+    public function filter_by_subject(array $curricula, string $subject): array {
+        $filtered = [];
+        foreach ($curricula as $idx => $curr) {
+            $subj = $this->extract_subject_name($curr['metadata']['subjectmodule'] ?? '');
+            if ($subj === $subject) {
+                $filtered[$idx] = $curr;
+            }
+        }
+        return $filtered;
     }
 
     /**
@@ -123,7 +137,7 @@ final class curriculum_selection_service {
     /**
      * Split the parser's stable subject display value into its hierarchy parts.
      */
-    private function subject_and_band(string $label): array {
+    public function subject_and_band(string $label): array {
         $parts = preg_split('/\s+—\s+/u', $label, 2);
         return [trim($parts[0] ?? ''), trim($parts[1] ?? '')];
     }

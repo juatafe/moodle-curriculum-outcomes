@@ -426,13 +426,20 @@ if ($viewstep === 1) {
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
     }
 
+    $valuationoptions = [
+        'achievement' => get_string('valuationachievement', 'local_criteriaoutcomes'),
+        'numeric' => get_string('valuationnumeric', 'local_criteriaoutcomes'),
+        'existing' => get_string('valuationexisting', 'local_criteriaoutcomes'),
+    ];
     if ($family === 'fp') {
         // FP valuation.
-        echo html_writer::label(get_string('valuation', 'local_criteriaoutcomes'), 'valuation');
+        echo html_writer::label(get_string('choosevaluation', 'local_criteriaoutcomes'), 'valuation');
         echo html_writer::select(
+            $valuationoptions,
             'valuation',
-            $flowstate['valuation'] ?? '',
-            ['class' => 'custom-select mb-2']
+            '',
+            ['' => get_string('choosedots')],
+            ['id' => 'valuation', 'class' => 'form-control mb-3']
         );
         echo html_writer::select(
             [],
@@ -443,11 +450,13 @@ if ($viewstep === 1) {
         );
     } else {
         // ESO/Bach valuation - no default selection.
-        echo html_writer::label(get_string('valuation', 'local_criteriaoutcomes'), 'valuation');
+        echo html_writer::label(get_string('choosevaluation', 'local_criteriaoutcomes'), 'valuation');
         echo html_writer::select(
+            $valuationoptions,
             'valuation',
             '',
-            ['class' => 'custom-select mb-2']
+            ['' => get_string('choosedots')],
+            ['id' => 'valuation', 'class' => 'form-control mb-3']
         );
         echo html_writer::select(
             [],
