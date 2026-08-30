@@ -159,13 +159,25 @@ if (!$jsonpage && has_capability('local/criteriaoutcomes:manage', $context)) {
         ['class' => 'btn btn-secondary mb-3']
     );
 }
-if (!$jsonpage && has_capability('local/criteriaoutcomes:mapquiz', $context)) {
+if (
+    !$jsonpage && (has_capability('local/criteriaoutcomes:mapquiz', $context)
+        || has_capability('local/criteriaoutcomes:maprubric', $context))
+) {
     echo $OUTPUT->heading(get_string('assessmentmappings', 'local_criteriaoutcomes'), 2);
-    echo html_writer::link(
-        new moodle_url('/local/criteriaoutcomes/quiz.php', ['id' => $courseid]),
-        get_string('quizcriteriamapping', 'local_criteriaoutcomes'),
-        ['class' => 'btn btn-secondary mb-3']
-    );
+    if (has_capability('local/criteriaoutcomes:mapquiz', $context)) {
+        echo html_writer::link(
+            new moodle_url('/local/criteriaoutcomes/quiz.php', ['id' => $courseid]),
+            get_string('quizcriteriamapping', 'local_criteriaoutcomes'),
+            ['class' => 'btn btn-secondary mb-3 mr-2']
+        );
+    }
+    if (has_capability('local/criteriaoutcomes:maprubric', $context)) {
+        echo html_writer::link(
+            new moodle_url('/local/criteriaoutcomes/rubric_mapping.php', ['id' => $courseid]),
+            get_string('rubriccriteriamapping', 'local_criteriaoutcomes'),
+            ['class' => 'btn btn-secondary mb-3']
+        );
+    }
 }
 if ($notice) {
     $notificationtype = str_contains($notice, (string)get_string('imported', 'local_criteriaoutcomes')) ? 'success' : 'info';

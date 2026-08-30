@@ -60,10 +60,10 @@ final class curriculum_selection_service {
             if ($subject === '') {
                 continue;
             }
-            // Extract just the subject name (before the — band separator)
-            $subjectName = $this->extract_subject_name($subject);
-            if (!in_array($subjectName, $subjects, true)) {
-                $subjects[] = $subjectName;
+            // Extract just the subject name (before the — band separator).
+            $subjectname = $this->extract_subject_name($subject);
+            if (!in_array($subjectname, $subjects, true)) {
+                $subjects[] = $subjectname;
             }
         }
         sort($subjects);
@@ -98,9 +98,9 @@ final class curriculum_selection_service {
             if ($subjectmodule === '') {
                 continue;
             }
-            // Check if this curriculum matches the subject (base name only)
-            $curriculumSubject = $this->extract_subject_name($subjectmodule);
-            if ($curriculumSubject !== $subject) {
+            // Check if this curriculum matches the subject (base name only).
+            $curriculumsubject = $this->extract_subject_name($subjectmodule);
+            if ($curriculumsubject !== $subject) {
                 continue;
             }
             $band = $this->infer_band_from_subjectmodule($subjectmodule);
@@ -116,7 +116,15 @@ final class curriculum_selection_service {
      * Infer course band from subjectmodule metadata.
      */
     private function infer_band_from_subjectmodule(string $subjectmodule): string {
-        [$ , $band] = $this->subject_and_band($subjectmodule);
+        [, $band] = $this->subject_and_band($subjectmodule);
         return $band;
+    }
+
+    /**
+     * Split the parser's stable subject display value into its hierarchy parts.
+     */
+    private function subject_and_band(string $label): array {
+        $parts = preg_split('/\s+—\s+/u', $label, 2);
+        return [trim($parts[0] ?? ''), trim($parts[1] ?? '')];
     }
 }

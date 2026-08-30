@@ -72,10 +72,49 @@ final class rubric_mapping_service {
         $record = $DB->get_record('local_crout_rubricmap', [
             'rubriccriterionid' => $rubriccriterionid,
             'curriculumcriterionid' => $curriculumcriterionid,
-        ], '*', MUST_EXIST);
+        ]);
         if ($record) {
             $DB->delete_records('local_crout_rubricmap', ['id' => $record->id]);
         }
+    }
+
+    /**
+     * Replace mappings for one rubric criterion with an exact new set.
+     */
+    public function replace_mappings_for_rubric_criterion(
+        int $courseid,
+        int $rubriccriterionid,
+        array $curriculumcriterionids
+    ): void {
+        global $DB;
+        $curriculumcriterionids = array_values(array_unique(array_map('intval', $curriculumcriterionids)));
+        foreach ($curriculumcriterionids as $cid) {
+            $this->validate_entities($courseid, $rubriccriterionid, $cid);
+        }
+        $existing = $DB->get_records('local_crout_rubricmap', ['rubriccriterionid' => $rubriccriterionid]);
+        $existingids = array_map(fn($r) => (int)$r->curriculumcriterionid, $existing);
+        $tokeep = array_intersect($existingids, $curriculumcriterionids);
+        $toadd = array_diff($curriculumcriterionids, $existingids);
+        $toremove = array_diff($existingids, $curriculumcriterionids);
+        $transaction = $DB->start_delegated_transaction();
+        foreach ($toremove as $cid) {
+            $DB->delete_records('local_crout_rubricmap', [
+                'rubriccriterionid' => $rubriccriterionid,
+                'curriculumcriterionid' => $cid,
+            ]);
+        }
+        $now = time();
+        foreach ($toadd as $cid) {
+            $DB->insert_record('local_crout_rubricmap', (object)[
+                'courseid' => $courseid,
+                'rubriccriterionid' => $rubriccriterionid,
+                'curriculumcriterionid' => $cid,
+                'weight' => null,
+                'timecreated' => $now,
+                'timemodified' => $now,
+            ]);
+        }
+        $transaction->allow_commit();
     }
 
     /**

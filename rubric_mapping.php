@@ -32,169 +32,195 @@ foreach ($configpaths as $configpath) {
 }
 defined('MOODLE_INTERNAL') || die();
 
-$course = required_param('course', PARAM_INT);
-$course = get_course($course);
-$cmid = required_param('cmid', PARAM_INT);
-$cm = get_coursemodule_from_instance('rubric', $cmid, $course->id, false, MUST_EXIST);
-require_login($course, false, $cm);
-$context = context_module::instance($cm->id);
-require_capability('local/criteriaoutcomes:maprubric', $context);
-$PAGE->set_url('/local/criteriaoutcomes/rubric_mapping.php', ['course' => $course->id, 'cmid' => $cmid]);
-$PAGE->set_context($context);
-$PAGE->set_cm($cm, $course);
+$courseid = required_param('id', PARAM_INT);
+$course = get_course($courseid);
+require_login($course);
+$coursecontext = context_course::instance($courseid);
+$PAGE->set_url('/local/criteriaoutcomes/rubric_mapping.php', ['id' => $courseid]);
+$PAGE->set_context($coursecontext);
 $PAGE->set_title(get_string('rubriccriteriamapping', 'local_criteriaoutcomes'));
-$PAGE->set_heading(format_string($course->fullname . ': ' . $cm->name));
+$PAGE->set_heading(format_string($course->fullname));
 
-// Get rubric definition
-$def = $DB->get_record('grading_definitions', ['id' => $cm->rubricdefinitionid], '*', MUST_EXIST);
-$area = $DB->get_record('grading_areas', ['id' => $def->areaid], '*', MUST_EXIST);
+$cmid = optional_param('cmid', 0, PARAM_INT);
 
-// Get all rubric criteria
-$rubriccriteria = $DB->get_records('gradingform_rubric_criteria', ['definitionid' => $def->id], 'sortorder, id');
-
-// Get curriculum criteria for this course
-$sql = "SELECT c.*, p.code AS parentcode, p.name AS parentname, p.id AS parentid
-          FROM {local_crout_criterion} c
-          JOIN {local_crout_parent} p ON p.id = c.parentid
-          JOIN {local_crout_framework} f ON f.id = p.frameworkid
-         WHERE f.courseid = :courseid AND f.archived = 0 AND p.archived = 0 AND c.archived = 0
-     ORDER BY p.sortorder, c.sortorder";
-$curriculumcriteria = array_values($DB->get_records_sql($sql, ['courseid' => $course->id]));
-
-// Get existing mappings from database
-$service = new \local_criteriaoutcomes\service\rubric_mapping_service();
-$existingmappings = $service->get_mappings_for_rubric_criteria(
-    array_keys($rubriccriteria)
-);
-
-// Build mapping state: rubric_criterion_id -> [curriculum_criterion_ids]
-$mappingstate = [];
-foreach ($existingmappings as $mapping) {
-    $rubricid = $mapping->rubriccriterionid;
-    if (!isset($mappingstate[$rubricid])) {
-        $mappingstate[$rubricid] = [];
+if ($cmid) {
+    $cm = get_coursemodule_from_id('', $cmid, $courseid, false, MUST_EXIST);
+    if ((int)$cm->course !== $courseid) {
+        throw new moodle_exception('invalidcoursemodule');
     }
-    $mappingstate[$rubricid][] = $mapping->curriculumcriterionid;
-}
+    $modcontext = context_module::instance($cm->id);
+    require_capability('local/criteriaoutcomes:maprubric', $modcontext);
+    require_capability('moodle/grade:managegradingforms', $modcontext);
+    $PAGE->set_url('/local/criteriaoutcomes/rubric_mapping.php', ['id' => $courseid, 'cmid' => $cmid]);
+    $PAGE->set_context($modcontext);
+    $PAGE->set_cm($cm, $course);
+    $PAGE->set_title(get_string('rubriccriteriamapping', 'local_criteriaoutcomes'));
+    $PAGE->set_heading(format_string($course->fullname . ': ' . $cm->name));
 
-// Handle form submission
-if (optional_param('savemappings', '', PARAM_ALPHA)) {
-    require_sesskey();
-    $transaction = $DB->start_delegated_transaction();
-    try {
-        foreach ($rubriccriteria as $rubriccriterionid => $rubriccriterion) {
-            $selectedids = optional_param_array('curriculacriteria[' . $rubriccriterionid . ']', [], PARAM_INT);
-            $previousids = $mappingstate[$rubriccriterionid] ?? [];
+    $gradingmanager = get_grading_manager($modcontext, $cm->modname, $cm->modname === 'assign' ? 'submissions' : null);
+    $controller = $gradingmanager->get_controller('rubric');
+    if (!$controller) {
+        throw new moodle_exception('gradingformunavailable', 'grading');
+    }
+    $definition = $controller->get_definition();
+    if (!$definition || $definition->status != 20) {
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('rubriccriteriamapping', 'local_criteriaoutcomes') . ' — ' . format_string($cm->name));
+        echo $OUTPUT->notification(get_string('norubricavailable', 'local_criteriaoutcomes'), 'warning');
+        $url = new moodle_url('/grade/grading/manage.php', ['id' => $cmid]);
+        echo html_writer::link($url, get_string('managegrades', 'core_grading'));
+        echo $OUTPUT->footer();
+        exit;
+    }
+    $rubriccriteria = $definition->rubric_criteria;
+    if (empty($rubriccriteria)) {
+        echo $OUTPUT->header();
+        echo $OUTPUT->heading(get_string('rubriccriteriamapping', 'local_criteriaoutcomes') . ' — ' . format_string($cm->name));
+        echo $OUTPUT->notification(get_string('norubricavailable', 'local_criteriaoutcomes'), 'warning');
+        echo $OUTPUT->footer();
+        exit;
+    }
 
-            // Remove mappings that were unselected
-            $removedids = array_diff($previousids, $selectedids);
-            foreach ($removedids as $removedid) {
-                $service->delete_mapping($rubriccriterionid, $removedid);
+    $sql = "SELECT c.id, c.code, c.name, c.parentid, p.code AS parentcode, p.name AS parentname
+              FROM {local_crout_criterion} c
+              JOIN {local_crout_parent} p ON p.id = c.parentid
+              JOIN {local_crout_framework} f ON f.id = p.frameworkid
+             WHERE f.courseid = :courseid AND f.archived = 0 AND p.archived = 0 AND c.archived = 0
+          ORDER BY p.sortorder, c.sortorder";
+    $curriculumcriteria = array_values($DB->get_records_sql($sql, ['courseid' => $courseid]));
+
+    $service = new \local_criteriaoutcomes\service\rubric_mapping_service();
+    $existingmappings = $service->get_mappings_for_rubric_criteria(array_keys($rubriccriteria));
+    $mappingstate = [];
+    foreach ($existingmappings as $mapping) {
+        $rid = (int)$mapping->rubriccriterionid;
+        if (!isset($mappingstate[$rid])) {
+            $mappingstate[$rid] = [];
+        }
+        $mappingstate[$rid][] = (int)$mapping->curriculumcriterionid;
+    }
+
+    if (optional_param('savemappings', 0, PARAM_BOOL)) {
+        require_sesskey();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            throw new moodle_exception('invalidrequest');
+        }
+        foreach ($rubriccriteria as $rid => $rc) {
+            $selected = optional_param_array('curriculacriteria_' . $rid, [], PARAM_INT);
+            $selected = array_values(array_unique(array_filter(array_map('intval', $selected))));
+            $service->replace_mappings_for_rubric_criterion($courseid, (int)$rid, $selected);
+        }
+        redirect(
+            new moodle_url('/local/criteriaoutcomes/rubric_mapping.php', ['id' => $courseid, 'cmid' => $cmid]),
+            get_string('mappingssaved', 'local_criteriaoutcomes'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
+    }
+
+    echo $OUTPUT->header();
+    echo $OUTPUT->heading(get_string('rubriccriteriamapping', 'local_criteriaoutcomes') . ' — ' . format_string($cm->name));
+    echo $OUTPUT->heading(get_string('rubriccriteriamapping', 'local_criteriaoutcomes'), 3);
+    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $courseid]);
+    echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'cmid', 'value' => $cmid]);
+
+    $grouped = [];
+    foreach ($curriculumcriteria as $cc) {
+        $grouped[$cc->parentcode . ' — ' . $cc->parentname][] = $cc;
+    }
+
+    foreach ($rubriccriteria as $rid => $rc) {
+        $rcid = (int)$rid;
+        $selected = $mappingstate[$rcid] ?? [];
+        $counttext = count($selected) . ' ' . get_string('criteria', 'local_criteriaoutcomes');
+        if (count($selected) === 1) {
+            $counttext = '1 ' . get_string('criterion', 'local_criteriaoutcomes');
+        }
+        echo html_writer::start_tag('fieldset', ['class' => 'mb-4 p-3 border']);
+        echo html_writer::tag('legend', s($rc['description'] ?? $rc['description'] ?? 'Dimension ' . $rcid), ['class' => 'h5']);
+        if (!empty($rc['levels'])) {
+            echo html_writer::start_tag('div', ['class' => 'small text-muted mb-2']);
+            foreach ($rc['levels'] as $level) {
+                $scoretext = isset($level['score']) ? ' (' . $level['score'] . ')' : '';
             }
-
-            // Save/new mappings (only add if not already existing)
-            foreach ($selectedids as $selectedid) {
-                // Check if mapping already exists
-                $existing = $DB->get_record('local_crout_rubricmap', [
-                    'rubriccriterionid' => $rubriccriterionid,
-                    'curriculumcriterionid' => $selectedid,
-                ], '*', MUST_EXIST);
-                if (!$existing) {
-                    $now = time();
-                    $DB->insert_record('local_crout_rubricmap', (object)[
-                        'courseid' => $course->id,
-                        'rubriccriterionid' => $rubriccriterionid,
-                        'curriculumcriterionid' => $selectedid,
-                        'weight' => null,
-                        'timecreated' => $now,
-                        'timemodified' => $now,
+            echo html_writer::end_tag('div');
+        }
+        echo html_writer::tag('p', s($counttext), ['class' => 'text-muted small']);
+        echo html_writer::tag('div', get_string('selectcriteria', 'local_criteriaoutcomes'), ['class' => 'font-weight-bold mb-1']);
+        if (empty($curriculumcriteria)) {
+            echo html_writer::tag('p', get_string('nocriteriaforquiz', 'local_criteriaoutcomes'), ['class' => 'text-warning']);
+        } else {
+            foreach ($grouped as $glabel => $crits) {
+                echo html_writer::tag('div', s($glabel), ['class' => 'font-weight-bold mt-2']);
+                foreach ($crits as $cc) {
+                    $cid = (int)$cc->id;
+                    $checked = in_array($cid, $selected, true) ? 'checked' : '';
+                    $inputid = 'cc_' . $rcid . '_' . $cid;
+                    echo html_writer::start_tag('div', ['class' => 'form-check']);
+                    echo html_writer::empty_tag('input', [
+                        'type' => 'checkbox',
+                        'name' => 'curriculacriteria_' . $rcid . '[]',
+                        'value' => $cid,
+                        'id' => $inputid,
+                        'class' => 'form-check-input',
+                        $checked => $checked,
                     ]);
+                    echo html_writer::end_tag('div');
                 }
             }
         }
-        $transaction->allow_commit();
-        echo $OUTPUT->notification(get_string('mappings_saved', 'local_criteriaoutcomes'));
-        redirect(new moodle_url('/local/criteriaoutcomes/rubric_mapping.php', ['course' => $course->id, 'cmid' => $cmid]));
-    } catch (Throwable $e) {
-        $transaction->rollback();
-        echo $OUTPUT->notification($e->getMessage(), 'error');
+        echo html_writer::end_tag('fieldset');
     }
+
+    echo html_writer::end_tag('form');
+    echo $OUTPUT->footer();
+    exit;
 }
 
+require_capability('local/criteriaoutcomes:view', $coursecontext);
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('rubriccriteriamapping', 'local_criteriaoutcomes') . ' — ' . format_string($cm->name));
+echo $OUTPUT->heading(get_string('rubriccriteriamapping', 'local_criteriaoutcomes'));
+echo html_writer::tag('p', get_string('activitywithrubrics', 'local_criteriaoutcomes'), ['class' => 'text-muted']);
 
-// Display each rubric dimension with mapping checkboxes
-foreach ($displaydata as $rubriccriterionid => $data) {
-    $rc = $data;
-    echo html_writer::start_div('rubric-dimension mb-3');
-    echo html_writer::start_div('d-flex justify-between align-items-center mb-2');
-    echo html_writer::tag('h4', s($rc['name']), ['class' => 'mb-0']);
-    echo html_writer::tag('small', get_string('rubricdimension', 'local_criteriaoutcomes'), ['class' => 'text-muted']);
-    echo html_writer::end_div();
-
-    // Show levels summary
-    if (!empty($rc['levels'])) {
-        echo html_writer::start_div('rubric-levels small text-muted mb-2');
-        $levels = explode("\n", $rc['levels']);
-        foreach ($levels as $level) {
-            if (trim($level)) {
-                echo html_writer::tag('span', trim($level), ['class' => 'mr-2']);
-            }
+$modinfo = get_fast_modinfo($course);
+$activities = [];
+foreach ($modinfo->get_cms() as $cm) {
+    if (!$cm->has_view()) {
+        continue;
+    }
+    $mcontext = context_module::instance($cm->id);
+    if (
+        !has_capability('local/criteriaoutcomes:maprubric', $mcontext)
+            || !has_capability('moodle/grade:managegradingforms', $mcontext)
+    ) {
+        continue;
+    }
+    try {
+        $gm = get_grading_manager($mcontext, $cm->modname, $cm->modname === 'assign' ? 'submissions' : null);
+        $ctrl = $gm->get_controller('rubric');
+        if (!$ctrl) {
+            continue;
         }
-        echo html_writer::end_div();
-    }
-
-    // Curriculum criteria selector
-    echo html_writer::start_div('curriculum-mapping mb-3');
-    echo html_writer::label(get_string('selectcriteria', 'local_criteriaoutcomes'), 'criteria-' . $rubriccriterionid);
-
-    // Create checkboxes for each curriculum criterion
-    $checkboxes = [];
-    foreach ($rc['allcurriculacriteria'] as $criteria) {
-        $isselected = in_array($criteria->id, $rc['curriculumcriteria'] ?? [], true);
-        $key = $rubriccriterionid . '_' . $criteria->id;
-        $checkboxes[$key] = html_writer::empty_tag('input', [
-            'type' => 'checkbox',
-            'name' => 'curriculacriteria[' . $rubriccriterionid . ']',
-            'value' => $criteria->id,
-            'class' => 'form-check-input',
-            'id' => 'criterion-' . $key,
-            'checked' => $isselected ? 'checked' : '',
-        ]);
-        $checkboxes[$key . '_label'] = html_writer::tag('label', s($criteria->code . ' — ' . $criteria->name), [
-            'class' => 'form-check-label',
-            'for' => 'criterion-' . $key,
-        ]);
-    }
-
-    // Group checkboxes in rows of 4
-    echo html_writer::start_div('d-flex flex-wrap');
-    $idx = 0;
-    foreach ($checkboxes as $key => $checkbox) {
-        echo html_writer::start_div('form-check me-2 mb-1', null, false);
-        echo $checkbox;
-        echo $checkboxes[$key . '_label'];
-        echo html_writer::end_div();
-        $idx++;
-        if ($idx % 4 === 0 && $idx < count($checkboxes)) {
-            echo html_writer::end_div() . "\n" . html_writer::start_div('d-flex flex-wrap');
+        $def = $ctrl->get_definition();
+        if (!$def || $def->status != 20 || empty($def->rubric_criteria)) {
+            continue;
         }
+        $activities[] = $cm;
+    } catch (Throwable $e) {
+        continue;
     }
-    echo html_writer::end_div();
-
-    echo html_writer::end_div();
-    echo html_writer::end_div();
 }
 
-// Save button
-echo html_writer::start_div('d-flex justify-content-end mt-3');
-echo html_writer::tag('button', get_string('savemappings', 'local_criteriaoutcomes'), [
-    'type' => 'submit',
-    'name' => 'savemappings',
-    'value' => '1',
-    'class' => 'btn btn-primary',
-]);
-echo html_writer::end_div();
-
+if (empty($activities)) {
+    echo $OUTPUT->notification(get_string('norubricavailable', 'local_criteriaoutcomes'), 'info');
+} else {
+    echo html_writer::start_tag('ul', ['class' => 'list-group']);
+    foreach ($activities as $cm) {
+        $url = new moodle_url('/local/criteriaoutcomes/rubric_mapping.php', ['id' => $courseid, 'cmid' => $cm->id]);
+        echo html_writer::tag('li', html_writer::link($url, format_string($cm->name)), ['class' => 'list-group-item']);
+    }
+    echo html_writer::end_tag('ul');
+}
 echo $OUTPUT->footer();
