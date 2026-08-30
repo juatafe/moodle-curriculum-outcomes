@@ -38,6 +38,8 @@ final class guided_import_state {
             'family' => $family,
             'selectiongroup' => '',
             'curriculumindex' => null,
+            'subject' => '',
+            'variant' => '',
             'valuation' => '',
             'scaleid' => 0,
             'selectedsourcekeys' => null,
@@ -58,16 +60,44 @@ final class guided_import_state {
      * Select or change the official hierarchy group and invalidate downstream choices.
      */
     public function select_group(array $state, string $group): array {
-        $groups = (new curriculum_selection_service())->groups($state['curricula']);
-        if (!isset($groups[$group])) {
-            throw new \invalid_parameter_exception('Invalid curriculum selection group.');
+        $service = new curriculum_selection_service();
+        $groups = $service->groups($state["curricula"]);
+        $subjects = $service->subjects($state["curricula"]);
+
+        // Check if this is a subject selection (ESO/Bach, at step 2)
+        $isSubjectSelection = $state["family"] !== "fp" && in_array($group, $subjects, true);
+
+        if ($isSubjectSelection) {
+            // Subject selection - set subject and reset downstream
+            if ($state["selectiongroup"] !== $group) {
+                $state["selectiongroup"] = $group;
+                $state["curriculumindex"] = null;
+                $state["subject"] = $group;
+                $state["variant"] = "";
+                $state["valuation"] = "";
+                $state["scaleid"] = 0;
+                $state["selectedsourcekeys"] = null;
+            }
+        } else {
+            // Course band or FP group selection
+            if (!isset($groups[$group])) {
+                throw new invalid_parameter_exception("Invalid curriculum selection group.");
+            }
+            if ($state["selectiongroup"] !== $group) {
+                $state["selectiongroup"] = $group;
+                $state["curriculumindex"] = null;
+                // Only reset subject if switching from a different group type
+                if ($state["family"] !== "fp") {
+                    $state["subject"] = "";
+                }
+                $state["variant"] = "";
+                $state["valuation"] = "";
+                $state["scaleid"] = 0;
+                $state["selectedsourcekeys"] = null;
+            }
         }
-        if ($state['selectiongroup'] !== $group) {
-            $state['selectiongroup'] = $group;
-            $state['curriculumindex'] = null;
-            $state['valuation'] = '';
-            $state['scaleid'] = 0;
-            $state['selectedsourcekeys'] = null;
+        return $state;
+    }
         }
         return $state;
     }
@@ -88,7 +118,8 @@ final class guided_import_state {
      * Select one curriculum and invalidate a preview only when it changes.
      */
     public function select_curriculum(array $state, int $index): array {
-        $available = (new curriculum_selection_service())->filter(
+        $service = new curriculum_selection_service();
+        $available = $service->filter(
             $state['curricula'],
             $state['selectiongroup']
         );
@@ -97,9 +128,29 @@ final class guided_import_state {
         }
         if ($state['curriculumindex'] !== $index) {
             $state['curriculumindex'] = $index;
-            $state['valuation'] = '';
-            $state['scaleid'] = 0;
-            $state['selectedsourcekeys'] = null;
+            $curriculum = $available[$index];
+            $metadata = $curriculum['metadata'] ?? [];
+            // If ESO/Bach and subject was previously selected, check for variants
+            if ($state['family'] !== 'fp' && $state['subject'] !== '') {
+                $variants = $service->variants_for_subject(
+                    $state['curricula'],
+                    $state['subject']
+                );
+                if (count($variants) <= 1) {
+                    // Only one variant - auto-select, no course band needed
+                    $state['variant'] = $variants[0] ?? '';
+                    $state['valuation'] = '';
+                    $state['scaleid'] = 0;
+                    $state['selectedsourcekeys'] = null;
+                } else {
+                    // Multiple variants - will be selected via selectiongroup later
+                    $state['variant'] = '';
+                }
+            } else {
+                $state['valuation'] = '';
+                $state['scaleid'] = 0;
+                $state['selectedsourcekeys'] = null;
+            }
         }
         return $state;
     }

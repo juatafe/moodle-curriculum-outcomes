@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+//
 
 /**
  * Teacher-facing official AEBOE curriculum import flow.
@@ -31,8 +32,8 @@ $context = context_course::instance($courseid);
 require_capability('local/criteriaoutcomes:import', $context);
 $PAGE->set_url('/local/criteriaoutcomes/boe.php', ['id' => $courseid]);
 $PAGE->set_context($context);
-$PAGE->set_course($course);
 $PAGE->set_title(get_string('boeimport', 'local_criteriaoutcomes'));
+    $PAGE->set_course($course);
 $PAGE->set_heading(format_string($course->fullname));
 
 /**
@@ -255,7 +256,7 @@ if ($viewstep === 1) {
     }
     echo html_writer::label(get_string('boesearchlabel', 'local_criteriaoutcomes'), 'boe-query');
     echo html_writer::empty_tag('input', ['id' => 'boe-query', 'name' => 'query', 'value' => $query,
-    'required' => 'required', 'maxlength' => 250, 'class' => 'form-control mb-2']);
+        'required' => 'required', 'maxlength' => 250, 'class' => 'form-control mb-2']);
     echo html_writer::tag('button', get_string('search'), ['type' => 'submit', 'class' => 'btn btn-primary']);
     echo html_writer::end_tag('form');
 
@@ -271,7 +272,7 @@ if ($viewstep === 1) {
             $lastupdate = local_criteriaoutcomes_boe_value($record['fecha_actualizacion'] ?? '');
             $range = local_criteriaoutcomes_boe_value($record['rango'] ?? '');
             $number = local_criteriaoutcomes_boe_value($record['numero_oficial'] ?? '');
-            $detectedfamily = \local_criteriaoutcomes\provider\boe_provider::detect_family($record);
+            $detectedfamily = \\ocal_criteriaoutcomes\provider\\boe_provider::detect_family($record);
             echo html_writer::start_div('card mb-3');
             echo html_writer::start_div('card-body');
             echo html_writer::tag('h4', s($title), ['class' => 'card-title']);
@@ -293,257 +294,215 @@ if ($viewstep === 1) {
                     ['class' => 'mb-2']
                 );
             }
-            echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url]);
-            foreach (
-                ['id' => $courseid, 'sesskey' => sesskey(), 'action' => 'load',
-                'identifier' => $identifier] as $name => $value
-            ) {
-                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
+            // Show detected family or selector
+            if ($detectedfamily) {
+                // Family detected unequivocally - show info, do NOT show selector
+                // Store family internally, proceed to subject selection at step 2
+                echo html_writer::tag('p', get_string('detectedfamily', 'local_criteriaoutcomes', $detectedfamily), ['class' => 'mb-2']);
+                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $courseid]);
+                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'load']);
+                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'identifier', 'value' => $identifier]);
+                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'family', 'value' => $detectedfamily]);
+                echo html_writer::tag('button', get_string('use_currriculum', 'local_criteriaoutcomes'), ['type' => 'submit', 'name' => 'action', 'value' => 'load', 'class' => 'btn btn-primary', 'style' => 'width: 100%']);
+                echo html_writer::end_div();
+                echo html_writer::end_div();
+                echo html_writer::end_div();
+                // Skip rendering the selector UI for this detected family,
+                // the "Use this curriculum" button will transition to step 2
+                continue;
+            } else {
+                // No detected family - show the normal selector UI
+                echo html_writer::label(get_string('educationfamily', 'local_criteriaoutcomes'), 'family-' . $identifier);
+                echo html_writer::select(
+                    ['fp' => 'FP', 'eso' => 'ESO', 'bach' => get_string('bachillerato', 'local_criteriaoutcomes')],
+                    'family',
+                    '',
+                    ['' => get_string('choosedots')],
+                    ['id' => 'family-' . $identifier, 'required' => 'required', 'class' => 'custom-select mx-2']
+                );
+                echo html_writer::tag(
+                    'button',
+                    get_string('loadcurricula', 'local_criteriaoutcomes'),
+                    ['type' => 'submit', 'class' => 'btn btn-secondary']
+                );
+                echo html_writer::end_tag('form');
+                echo html_writer::end_div();
+                echo html_writer::end_div();
+                echo html_writer::end_div();
             }
-            echo html_writer::label(get_string('educationfamily', 'local_criteriaoutcomes'), 'family-' . $identifier);
-            echo html_writer::select(
-                ['fp' => 'FP', 'eso' => 'ESO', 'bach' => get_string('bachillerato', 'local_criteriaoutcomes')],
-                'family',
-                $detectedfamily ?? '',
-                ['' => get_string('choosedots')],
-                ['id' => 'family-' . $identifier, 'required' => 'required', 'class' => 'custom-select mx-2']
-            );
-            echo html_writer::tag(
-                'button',
-                get_string('loadcurricula', 'local_criteriaoutcomes'),
-                ['type' => 'submit', 'class' => 'btn btn-secondary']
-            );
-            echo html_writer::end_tag('form');
-            echo html_writer::end_div();
-            echo html_writer::end_div();
         }
     }
-}
+} else if ($viewstep === 2) {
+    // Step 2: Select subject (ESO/Bach) or continue with FP qualification
+    $service = new \local_criteriaoutcomes\service\curriculum_selection_service();
+    $curricula = $flowstate['curricula'] ?? [];
+    $family = $flowstate['family'] ?? '';
 
-if ($viewstep === 2 && is_array($flowstate)) {
-    $curricula = $flowstate['curricula'];
-    echo $OUTPUT->heading(get_string(
-        $flowstate['family'] === 'fp' ? 'selectcurriculumfp' : 'selectcurriculumgeneral',
-        'local_criteriaoutcomes'
-    ), 3);
-    if (!$curricula) {
-        echo $OUTPUT->notification(get_string('nocurriculafound', 'local_criteriaoutcomes'), 'warning');
-    } else {
-        $selector = new \local_criteriaoutcomes\service\curriculum_selection_service();
-        $groups = $selector->groups($curricula);
-        $selectedgroup = $flowstate['selectiongroup'];
-        if ($selectedgroup === '') {
-            echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mb-4']);
-            $hiddenparams = [
-                'id' => $courseid,
-                'sesskey' => sesskey(),
-                'action' => 'selectgroup',
-                'token' => $token,
-            ];
-            foreach (
-                $hiddenparams as $name => $value
-            ) {
-                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
-            }
-            $family = $curricula[array_key_first($curricula)]['metadata']['curriculumtype'] ?? '';
-            $grouplabel = $family === 'fp' ? 'qualification' : 'courseband';
-            echo html_writer::label(get_string($grouplabel, 'local_criteriaoutcomes'), 'selectiongroup');
-            echo html_writer::select(
-                array_combine(array_keys($groups), array_keys($groups)),
-                'selectiongroup',
-                '',
-                ['' => get_string('choosedots')],
-                ['id' => 'selectiongroup', 'required' => 'required', 'class' => 'form-control mb-3']
-            );
-            echo html_writer::tag('button', get_string('continue'), ['type' => 'submit', 'class' => 'btn btn-primary']);
-            echo html_writer::end_tag('form');
-            echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mt-2']);
-            foreach (['id' => $courseid, 'sesskey' => sesskey(), 'action' => 'backsource', 'token' => $token] as $name => $value) {
-                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
-            }
-            echo html_writer::tag(
-                'button',
-                get_string('backandmodifysource', 'local_criteriaoutcomes'),
-                ['class' => 'btn btn-secondary']
-            );
-            echo html_writer::end_tag('form');
-        } else {
-            $filteredcurricula = $selector->filter($curricula, $selectedgroup);
-            echo html_writer::tag('p', s($selectedgroup), ['class' => 'alert alert-info']);
-            echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url]);
-            $hiddenparams = [
-                'id' => $courseid,
-                'sesskey' => sesskey(),
-                'action' => 'selectcurriculum',
-                'token' => $token,
-            ];
-            foreach ($hiddenparams as $name => $value) {
-                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
-            }
-            $options = [];
-            foreach ($filteredcurricula as $index => $curriculum) {
-                $options[$index] = $groups[$selectedgroup][$index];
-            }
-            echo html_writer::label(get_string('curriculum', 'local_criteriaoutcomes'), 'curriculumindex');
-            echo html_writer::select(
-                $options,
-                'curriculumindex',
-                $flowstate['curriculumindex'],
-                ['' => get_string('choosedots')],
-                ['id' => 'curriculumindex', 'required' => 'required', 'class' => 'form-control mb-3']
-            );
-            echo html_writer::tag('button', get_string('continue'), ['class' => 'btn btn-primary']);
-            echo html_writer::end_tag('form');
-            echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mt-2']);
-            foreach (['id' => $courseid, 'sesskey' => sesskey(), 'action' => 'cleargroup', 'token' => $token] as $name => $value) {
-                echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
-            }
-            echo html_writer::tag(
-                'button',
-                get_string('backandmodifygroup', 'local_criteriaoutcomes'),
-                ['class' => 'btn btn-secondary']
-            );
-            echo html_writer::end_tag('form');
-        }
-    }
-}
-
-if ($viewstep === 3 && is_array($flowstate)) {
-    $scales = $importer->available_scales($courseid);
-    echo $OUTPUT->heading(get_string('choosevaluation', 'local_criteriaoutcomes'), 3);
-    echo html_writer::tag('p', get_string('valuationhelp', 'local_criteriaoutcomes'));
-    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url]);
-    foreach (['id' => $courseid, 'sesskey' => sesskey(), 'action' => 'valuation', 'token' => $token] as $name => $value) {
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
-    }
-    $valuationoptions = [
-        'achievement' => 'valuationachievement',
-        'numeric' => 'valuationnumeric',
-        'existing' => 'valuationexisting',
-    ];
-    foreach ($valuationoptions as $value => $key) {
-        $radioid = 'valuation-' . $value;
-        $attributes = [
-            'type' => 'radio',
-            'id' => $radioid,
-            'name' => 'valuation',
-            'value' => $value,
-            'required' => 'required',
-        ];
-        if ($flowstate['valuation'] === $value) {
-            $attributes['checked'] = 'checked';
-        }
-        $radio = html_writer::empty_tag('input', $attributes);
-        $radio .= html_writer::label(get_string($key, 'local_criteriaoutcomes'), $radioid);
-        echo html_writer::div($radio, 'mb-2');
-    }
-    echo html_writer::label(get_string('existingadvanced', 'local_criteriaoutcomes'), 'boe-scale');
-    echo html_writer::select(
-        $scales,
-        'scaleid',
-        $flowstate['scaleid'],
-        [0 => get_string('choosedots')],
-        ['id' => 'boe-scale', 'class' => 'form-control mb-3']
-    );
-    echo html_writer::tag('button', get_string('preview', 'local_criteriaoutcomes'), ['class' => 'btn btn-primary']);
-    echo html_writer::end_tag('form');
-    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mt-2']);
-    $hiddenparams = [
-        'id' => $courseid,
-        'sesskey' => sesskey(),
-        'action' => 'backcurriculum',
-        'token' => $token,
-    ];
-    foreach ($hiddenparams as $name => $value) {
-        echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
-    }
-    echo html_writer::tag(
-        'button',
-        get_string('backandmodifycurriculum', 'local_criteriaoutcomes'),
-        ['class' => 'btn btn-secondary']
-    );
-    echo html_writer::end_tag('form');
-}
-
-if ($viewstep === 4 && $preview !== null) {
-    $stored = $SESSION->local_criteriaoutcomes_boe_preview[$previewtoken];
-    $selected = $stored['selectedsourcekeys'];
-    if ($selected === null) {
-        $selected = [];
-        foreach ($preview['parents'] as $parent) {
-            foreach ($parent['criteria'] as $criterion) {
-                if ($criterion['status'] !== \local_criteriaoutcomes\service\import_service::STATUS_CONFLICT) {
-                    $selected[] = $criterion['sourcekey'];
-                }
-            }
-        }
-    }
-    echo $OUTPUT->heading(get_string('previewtitle', 'local_criteriaoutcomes'), 3);
-    echo html_writer::tag(
-        'p',
-        get_string('selectedcriteriacount', 'local_criteriaoutcomes', count($selected)),
-        ['class' => 'alert alert-info']
-    );
-    echo html_writer::start_div('local-criteriaoutcomes-actions mb-3');
-    foreach (['all' => 'selectall', 'none' => 'deselectall'] as $mode => $key) {
-        echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url]);
-        foreach (
-            ['id' => $courseid, 'sesskey' => sesskey(), 'action' => 'previewselection',
-            'previewtoken' => $previewtoken, 'selectionmode' => $mode] as $name => $value
-        ) {
+    if ($family === 'fp') {
+        // FP flow: show qualification → module selector
+        echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mb-4']);
+        foreach (['id' => $courseid, 'sesskey' => sesskey(), 'token' => $token, 'action' => 'selectgroup'] as $name => $value) {
             echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
         }
-        echo html_writer::tag('button', get_string($key, 'local_criteriaoutcomes'), ['class' => 'btn btn-secondary']);
+        $groups = $service->groups($curricula);
+        echo html_writer::label(get_string('qualification', 'local_criteriaoutcomes'), 'group-' . $flowstate['identifier']);
+        echo html_writer::select(
+            $groups,
+            'selectiongroup',
+            $flowstate['selectiongroup'] ?? '',
+            ['' => get_string('choosedots')],
+            ['class' => 'custom-select mb-2']
+        );
+        echo html_writer::tag(
+            'button',
+            get_string('continue', 'local_criteriaoutcomes'),
+            ['type' => 'submit', 'class' => 'btn btn-primary']
+        );
         echo html_writer::end_tag('form');
+    } else {
+        // ESO/Bach flow: show subject selector first
+        $subjects = $service->subjects($curricula);
+        echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mb-4']);
+        foreach (['id' => $courseid, 'sesskey' => sesskey(), 'token' => $token, 'action' => 'selectgroup'] as $name => $value) {
+            echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
+        }
+        echo html_writer::label(get_string('select_materia', 'local_criteriaoutcomes'), 'subject-' . $flowstate['identifier']);
+        echo html_writer::select(
+            array_combine($subjects, $subjects),
+            'selectiongroup',
+            $flowstate['subject'] ?? '',
+            ['' => get_string('choosedots')],
+            ['class' => 'custom-select mb-2', 'id' => 'subject-selector']
+        );
+        echo html_writer::tag(
+            'button',
+            get_string('continue', 'local_criteriaoutcomes'),
+            ['type' => 'submit', 'class' => 'btn btn-primary']
+        );
+        echo html_writer::end_tag('form');
+
+        // Check if selected subject has multiple variants
+        $selectedsubject = $flowstate['subject'] ?? '';
+        if ($selectedsubject !== '') {
+            $variants = $service->variants_for_subject($curricula, $selectedsubject);
+            if (count($variants) > 1) {
+                // Multiple variants - show course/band selector
+                echo html_writer::start_div('local-criteriaoutcomes-variants mb-3');
+                echo html_writer::label(get_string('select_course_band', 'local_criteriaoutcomes'), 'variant-' . $flowstate['identifier']);
+                echo html_writer::select(
+                    array_combine($variants, $variants),
+                    'selectiongroup',
+                    $flowstate['selectiongroup'] ?? '',
+                    ['' => get_string('choosedots')],
+                    ['class' => 'custom-select mb-2']
+                );
+                echo html_writer::tag(
+                    'button',
+                    get_string('continue', 'local_criteriaoutcomes'),
+                    ['type' => 'submit', 'class' => 'btn btn-primary']
+                );
+                echo html_writer::end_div();
+            }
+        }
     }
-    echo html_writer::end_div();
-    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url]);
-    foreach (['id' => $courseid, 'sesskey' => sesskey(), 'previewtoken' => $previewtoken] as $name => $value) {
+} else if ($viewstep === 3) {
+    // Step 3: Valuation selection
+    $service = new \local_criteriaoutcomes\service\curriculum_selection_service();
+    $curricula = $flowstate['curricula'] ?? [];
+    $family = $flowstate['family'] ?? '';
+
+    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mb-4']);
+    foreach (['id' => $courseid, 'sesskey' => sesskey(), 'token' => $token, 'action' => 'valuation'] as $name => $value) {
         echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
     }
-    foreach ($preview['parents'] as $parentindex => $parent) {
-        $detailsattributes = ['class' => 'local-criteriaoutcomes-parent mb-3'];
-        if ($parentindex === 0) {
-            $detailsattributes['open'] = 'open';
-        }
-        echo html_writer::start_tag('details', $detailsattributes);
-        echo html_writer::tag('summary', s($parent['code'] . ' — ' . $parent['name']) .
-            html_writer::span(count($parent['criteria']), 'badge badge-secondary ml-2'));
-        echo html_writer::start_div('p-3');
-        foreach ($parent['criteria'] as $criterion) {
-            $checked = in_array($criterion['sourcekey'], $selected, true);
-            $label = $criterion['code'] . ' — ' . $criterion['name'] . ' [' . strtoupper($criterion['status']) . ']';
-            echo html_writer::div(html_writer::checkbox(
-                'sourcekeys[]',
-                $criterion['sourcekey'],
-                $checked,
-                s($label),
-                $criterion['status'] === \local_criteriaoutcomes\service\import_service::STATUS_CONFLICT
-                    ? ['disabled' => 'disabled'] : []
-            ), 'mb-2');
-        }
-        echo html_writer::end_div();
-        echo html_writer::end_tag('details');
-    }
-    foreach ($preview['removed'] as $removed) {
-        echo html_writer::div(
-            s($removed['code'] . ' — ' . $removed['name'] . ' [REMOVED_FROM_SOURCE]'),
-            'alert alert-warning'
+
+    if ($family === 'fp') {
+        // FP valuation
+        echo html_writer::label(get_string('valuation', 'local_criteriaoutcomes'), 'valuation');
+        echo html_writer::select(
+            ['achievement' => get_string('achievement_5_levels', 'local_criteriaoutcomes'), 'numeric' => get_string('numeric_0_to_10', 'local_criteriaoutcomes'), 'existing' => get_string('existing_moodle_scale', 'local_criteriaoutcomes')],
+            'valuation',
+            $flowstate['valuation'] ?? '',
+            ['achievement' => get_string('achievement_5_levels', 'local_criteriaoutcomes') . ' / 5 levels', 'numeric' => get_string('numeric_0_to_10', 'local_criteriaoutcomes'), 'existing' => get_string('existing_moodle_scale', 'local_criteriaoutcomes')],
+            ['class' => 'custom-select mb-2']
+        );
+        echo html_writer::select(
+            [],
+            'scaleid',
+            $flowstate['scaleid'] ?? 0,
+            [],
+            ['class' => 'd-none']
+        );
+    } else {
+        // ESO/Bach valuation - no default selection
+        echo html_writer::label(get_string('valuation', 'local_criteriaoutcomes'), 'valuation');
+        echo html_writer::select(
+            ['achievement' => get_string('achievement_5_levels', 'local_criteriaoutcomes'), 'numeric' => get_string('numeric_0_to_10', 'local_criteriaoutcomes')],
+            'valuation',
+            '',
+            ['achievement' => get_string('achievement_5_levels', 'local_criteriaoutcomes'), 'numeric' => get_string('numeric_0_to_10', 'local_criteriaoutcomes')],
+            ['class' => 'custom-select mb-2']
+        );
+        echo html_writer::select(
+            [],
+            'scaleid',
+            0,
+            [],
+            ['class' => 'd-none']
         );
     }
-    echo html_writer::start_div('local-criteriaoutcomes-actions mt-3');
+
     echo html_writer::tag(
         'button',
-        get_string('backandmodifyvaluation', 'local_criteriaoutcomes'),
-        ['name' => 'action', 'value' => 'backvaluation', 'class' => 'btn btn-secondary']
+        get_string('continue', 'local_criteriaoutcomes'),
+        ['type' => 'submit', 'class' => 'btn btn-primary']
     );
-    echo html_writer::tag(
-        'button',
-        get_string('importselectedcriteria', 'local_criteriaoutcomes', count($selected)),
-        ['name' => 'action', 'value' => 'confirm', 'class' => 'btn btn-primary', 'disabled' => count($selected) ? null : 'disabled']
-    );
-    echo html_writer::end_div();
     echo html_writer::end_tag('form');
+} else if ($viewstep === 4) {
+    // Step 4: Review and import
+    $previewtoken = optional_param('previewtoken', '', PARAM_ALPHANUM);
+    $stored = $SESSION->local_criteriaoutcomes_boe_preview[$previewtoken] ?? null;
+    if (is_array($stored) && ($stored['courseid'] ?? 0) === $courseid) {
+        $preview = $importer->preview($courseid, $stored['curriculum'], $stored['scaleid']);
+        $selectionmode = optional_param('selectionmode', 'partial', PARAM_ALPHA);
+        $selected = optional_param_array('sourcekeys', [], PARAM_ALPHANUMEXT);
+        if ($selectionmode === 'all') {
+            $selected = [];
+            foreach ($preview['parents'] as $parent) {
+                foreach ($parent['criteria'] as $criterion) {
+                    if ($criterion['status'] !== \local_criteriaoutcomes\service\import_service::STATUS_CONFLICT) {
+                        $selected[] = $criterion['sourcekey'];
+                    }
+                }
+            }
+        } else if ($selectionmode === 'none') {
+            $selected = [];
+        }
+        echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url, 'class' => 'mb-4']);
+        foreach (['id' => $courseid, 'sesskey' => sesskey(), 'previewtoken' => $previewtoken, 'action' => 'confirm'] as $name => $value) {
+            echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => $name, 'value' => $value]);
+        }
+        echo html_writer::tag('h3', get_string('preview', 'local_criteriaoutcomes'), ['class' => 'mb-3']);
+        echo html_writer::start_tag('div', ['class' => 'row']);
+        $open = true;
+        foreach ($preview['parents'] as $parent) {
+            $open = !$open;
+            echo html_writer::start_tag('details', ['open' => $open, 'class' => 'mb-3']);
+            echo html_writer::summary(get_string('criterios', 'local_criteriaoutcomes') . ' ' . $parent['name']);
+            foreach ($parent['criteria'] as $criterion) {
+                $checked = in_array($criterion['sourcekey'], $selected, true) ? 'checked' : '';
+                echo html_writer::tag('label', s($criterion['name']), ['class' => 'form-check-label', 'for' => 'criterion-' . $criterion['sourcekey']]);
+                echo html_writer::empty_tag('input', ['type' => 'checkbox', 'name' => 'sourcekeys[' . $criterion['sourcekey'] . ']', 'value' => $criterion['sourcekey'], 'class' => 'form-check-input', 'id' => 'criterion-' . $criterion['sourcekey'], $checked]);
+            }
+            echo html_writer::end_tag('details');
+        }
+        echo html_writer::end_tag('div');
+        echo html_writer::tag('p', get_string('selected_count', 'local_criteriaoutcomes', count($selected)) . ' ' . get_string('criterios', 'local_criteriaoutcomes'), ['class' => 'mb-3']);
+        echo html_writer::tag('button', get_string('import_all', 'local_criteriaoutcomes'), ['type' => 'submit', 'name' => 'selectionmode', 'value' => 'all', 'class' => 'btn btn-primary mr-2']);
+        echo html_writer::tag('button', get_string('deselect_all', 'local_criteriaoutcomes'), ['type' => 'submit', 'name' => 'selectionmode', 'value' => 'none', 'class' => 'btn btn-secondary']);
+        echo html_writer::tag('button', get_string('import_selected', 'local_criteriaoutcomes'), ['type' => 'submit', 'class' => 'btn btn-success']);
+        echo html_writer::end_tag('form');
+    }
 }
-echo html_writer::end_div();
-echo $OUTPUT->footer();
+echo html_writer::end_div('local-criteriaoutcomes-flow');

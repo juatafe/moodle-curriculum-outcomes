@@ -50,6 +50,37 @@ final class curriculum_selection_service {
     }
 
     /**
+     * Return unique subject names from curricula, without duplication by band.
+     */
+    public function subjects(array $curricula): array {
+        $subjects = [];
+        foreach ($curricula as $index => $curriculum) {
+            $metadata = $curriculum['metadata'] ?? [];
+            $subject = $metadata['subjectmodule'] ?? '';
+            if ($subject === '') {
+                continue;
+            }
+            // Extract just the subject name (before the — band separator)
+            $subjectName = $this->extract_subject_name($subject);
+            if (!in_array($subjectName, $subjects, true)) {
+                $subjects[] = $subjectName;
+            }
+        }
+        sort($subjects);
+        return $subjects;
+    }
+
+    /**
+     * Extract the base subject name from a subjectmodule string.
+     * e.g. "Matemáticas — Cursos primero a tercero" -> "Matemáticas"
+     * e.g. "Matemáticas" -> "Matemáticas"
+     */
+    private function extract_subject_name(string $subjectmodule): string {
+        $parts = preg_split('/\s+—\s+/u', $subjectmodule, 2);
+        return trim($parts[0] ?? $subjectmodule);
+    }
+
+    /**
      * Filter a curriculum list to one explicit group.
      */
     public function filter(array $curricula, string $selectedgroup): array {
@@ -57,10 +88,35 @@ final class curriculum_selection_service {
     }
 
     /**
-     * Split the parser's stable subject display value into its hierarchy parts.
+     * Return course bands/variants for a specific subject.
      */
-    private function subject_and_band(string $label): array {
-        $parts = preg_split('/\s+—\s+/u', $label, 2);
-        return [trim($parts[0] ?? ''), trim($parts[1] ?? '')];
+    public function variants_for_subject(array $curricula, string $subject): array {
+        $variants = [];
+        foreach ($curricula as $index => $curriculum) {
+            $metadata = $curriculum['metadata'] ?? [];
+            $subjectmodule = $metadata['subjectmodule'] ?? '';
+            if ($subjectmodule === '') {
+                continue;
+            }
+            // Check if this curriculum matches the subject (base name only)
+            $curriculumSubject = $this->extract_subject_name($subjectmodule);
+            if ($curriculumSubject !== $subject) {
+                continue;
+            }
+            $band = $this->infer_band_from_subjectmodule($subjectmodule);
+            if ($band !== '') {
+                $variants[$band] = $band;
+            }
+        }
+        ksort($variants);
+        return array_values($variants);
+    }
+
+    /**
+     * Infer course band from subjectmodule metadata.
+     */
+    private function infer_band_from_subjectmodule(string $subjectmodule): string {
+        [$ , $band] = $this->subject_and_band($subjectmodule);
+        return $band;
     }
 }
