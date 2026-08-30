@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -553,5 +554,185 @@ class behat_local_criteriaoutcomes extends behat_base {
             'courseid' => $courseid, 'criterionid' => $criterionid,
         ]);
         $this->getSession()->visit($this->locate_path($url->out_as_local_url(false)));
+    }
+    /**
+     * Create native rubric for Behat.
+     *
+     * @Given /^I create the native rubric for "([^"]*)" in course "([^"]*)" with dimensions:$/
+     */
+    public function i_create_the_native_rubric_for_in_course_with_dimensions(string $assignname, string $courseshortname, \Behat\Gherkin\Node\TableNode $table): void {
+        global $DB;
+        $courseid = $DB->get_field('course', 'id', ['shortname' => $courseshortname], MUST_EXIST);
+        $cm = $DB->get_record_sql(
+            "SELECT cm.id FROM {course_modules} cm JOIN {modules} m ON m.id = cm.module
+              JOIN {assign} a ON a.id = cm.instance WHERE a.name = :name AND cm.course = :courseid",
+            ['name' => $assignname, 'courseid' => $courseid],
+            MUST_EXIST
+        );
+        $context = \context_module::instance($cm->id);
+        $criteria = [];
+        foreach ($table->getRows() as $row) {
+            $dimension = trim($row[0]);
+            $levels = [];
+            for ($i = 1; $i < count($row); $i += 2) {
+                $levelname = trim($row[$i] ?? '');
+                $score = isset($row[$i + 1]) ? (int)trim($row[$i + 1]) : 0;
+                if ($levelname !== '') {
+                    $levels[$levelname] = $score;
+                }
+            }
+            if ($dimension !== '' && !empty($levels)) {
+                $criteria[$dimension] = $levels;
+            }
+        }
+        if (empty($criteria)) {
+            throw new \Exception('No rubric dimensions provided');
+        }
+        $rubricgenerator = \behat_util::get_data_generator()->get_plugin_generator('gradingform_rubric');
+        $rubricgenerator->create_instance($context, 'mod_assign', 'submissions', 'Rubric for ' . $assignname, '', $criteria);
+    }
+
+    /**
+     * Import curriculum for Behat.
+     *
+     * @Given /^I import curriculum "([^"]*)" with criteria "([^"]*)"$/
+     */
+    public function i_import_curriculum_with_criteria(string $courseshortname, string $codes): void {
+        global $DB, $CFG;
+        require_once($CFG->libdir . '/grade/grade_scale.php');
+        $courseid = $DB->get_field('course', 'id', ['shortname' => $courseshortname], MUST_EXIST);
+        $codelist = array_map('trim', explode(',', $codes));
+        $codelist = array_filter($codelist);
+        if (empty($codelist)) {
+            throw new \Exception('No criteria codes provided');
+        }
+        $parent = ['codigo' => 'RA1', 'nombre' => 'Parent', 'criterios' => []];
+        foreach ($codelist as $code) {
+            $parent['criterios'][] = ['codigo' => $code, 'nombre' => 'Criterion ' . $code];
+        }
+        $scale = new \grade_scale();
+        $scale->courseid = $courseid;
+        $scale->userid = get_admin()->id;
+        $scale->name = 'Rubric scale ' . $courseshortname . ' ' . time();
+        $scale->scale = 'A,B,C';
+        $scale->description = '';
+        $scale->descriptionformat = FORMAT_HTML;
+        $scale->insert('behat');
+        $provider = new \local_criteriaoutcomes\provider\json_provider();
+        $curriculum = $provider->parse(json_encode([
+            'metadata' => ['name' => 'Behat curriculum ' . $courseshortname, 'type' => 'fp'],
+            'resultados' => [[
+                'codigo' => $parent['codigo'], 'nombre' => $parent['nombre'], 'criterios' => $parent['criterios'],
+            ]],
+        ]));
+        $importer = new \local_criteriaoutcomes\service\import_service();
+        $importer->import($courseid, $scale->id, $curriculum);
+    }
+
+    /**
+     * Visit rubric mapping page.
+     *
+     * @Given /^I visit the rubric mapping page for "([^"]*)" in course "([^"]*)"$/
+     */
+    public function i_visit_the_rubric_mapping_page_for_in_course(string $assignname, string $courseshortname): void {
+        global $DB;
+        $courseid = $DB->get_field('course', 'id', ['shortname' => $courseshortname], MUST_EXIST);
+        $cmid = $DB->get_field_sql(
+            "SELECT cm.id FROM {course_modules} cm JOIN {modules} m ON m.id = cm.module
+              JOIN {assign} a ON a.id = cm.instance WHERE a.name = :name AND cm.course = :courseid",
+            ['name' => $assignname, 'courseid' => $courseid],
+            MUST_EXIST
+        );
+        $url = new moodle_url('/local/criteriaoutcomes/rubric_mapping.php', ['id' => $courseid, 'cmid' => $cmid]);
+        $this->getSession()->visit($this->locate_path($url->out_as_local_url(false)));
+    }
+
+    /**
+     * Set rubric mapping for dimension.
+     *
+     * @When /^I set the rubric mapping for dimension "([^"]*)" to criteria "([^"]*)" with value "([^"]*)"$/
+     */
+    public function i_set_the_rubric_mapping_for_dimension_to_criteria_with_value(string $dimension, string $code, string $value): void {
+        $page = $this->getSession()->getPage();
+        $fieldsets = $page->findAll('css', 'fieldset');
+        foreach ($fieldsets as $fs) {
+            $legend = $fs->find('css', 'legend');
+            if ($legend && strpos($legend->getText(), $dimension) !== false) {
+                $labels = $fs->findAll('css', 'label');
+                foreach ($labels as $label) {
+                    if (strpos($label->getText(), $code) !== false) {
+                        $for = $label->getAttribute('for');
+                        $input = $page->find('css', '#' . $for);
+                        if ($input) {
+                            if ($value === '1' && !$input->isChecked()) {
+                                $input->check();
+                            } else if ($value === '0' && $input->isChecked()) {
+                                $input->uncheck();
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        throw new \Exception('Rubric mapping checkbox not found: ' . $dimension . ' ' . $code);
+    }
+
+    /**
+     * Assert rubric mapping includes criterion.
+     *
+     * @Then /^the rubric mapping for dimension "([^"]*)" should include "([^"]*)"$/
+     */
+    public function the_rubric_mapping_for_dimension_should_include(string $dimension, string $code): void {
+        $page = $this->getSession()->getPage();
+        $found = false;
+        $fieldsets = $page->findAll('css', 'fieldset');
+        foreach ($fieldsets as $fs) {
+            $legend = $fs->find('css', 'legend');
+            if ($legend && strpos($legend->getText(), $dimension) !== false) {
+                $labels = $fs->findAll('css', 'label');
+                foreach ($labels as $label) {
+                    if (strpos($label->getText(), $code) !== false) {
+                        $for = $label->getAttribute('for');
+                        $input = $page->find('css', '#' . $for);
+                        if ($input && $input->isChecked()) {
+                            $found = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+        if (!$found) {
+            throw new \Exception('Expected rubric mapping ' . $dimension // phpcs:ignore Generic.Files.LineLength.TooLong
+                . ' to include ' . $code . ' but it was not checked');
+        }
+    }
+
+    /**
+     * Assert rubric mapping does not include criterion.
+     *
+     * @Then /^the rubric mapping for dimension "([^"]*)" should not include "([^"]*)"$/
+     */
+    public function the_rubric_mapping_for_dimension_should_not_include(string $dimension, string $code): void {
+        $page = $this->getSession()->getPage();
+        $fieldsets = $page->findAll('css', 'fieldset');
+        foreach ($fieldsets as $fs) {
+            $legend = $fs->find('css', 'legend');
+            if ($legend && strpos($legend->getText(), $dimension) !== false) {
+                $labels = $fs->findAll('css', 'label');
+                foreach ($labels as $label) {
+                    if (strpos($label->getText(), $code) !== false) {
+                        $for = $label->getAttribute('for');
+                        $input = $page->find('css', '#' . $for);
+                        if ($input && $input->isChecked()) {
+                            throw new \Exception('Expected rubric mapping ' . $dimension // phpcs:ignore Generic.Files.LineLength.TooLong
+                                . ' to NOT include ' . $code . ' but it was checked');
+                        }
+                        return;
+                    }
+                }
+            }
+        }
     }
 }

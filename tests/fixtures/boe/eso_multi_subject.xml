@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<response><status><code>200</code><text>ok</text></status><data>
+<bloque titulo="ANEXO II"><version>
+<p class="centro_negrita">Tecnología y Digitalización</p>
+<p class="parrafo_2">Competencias específicas.</p>
+<p class="parrafo_2">1. Texto real de competencia específica Tech</p>
+<p class="centro_cursiva">Cursos de primero a tercero</p>
+<p class="centro_redonda">Criterios de evaluación</p>
+<p class="parrafo_2">Competencia específica 1.</p>
+<p class="parrafo_2">1.1 Texto criterio uno Tech band1</p>
+<p class="parrafo">1.2 Texto criterio dos Tech band1</p>
+<p class="centro_negrita">Tecnología y Digitalización</p>
+<p class="parrafo_2">Competencias específicas.</p>
+<p class="parrafo_2">1. Texto real de competencia específica Tech variant2</p>
+<p class="centro_cursiva">Cuarto curso</p>
+<p class="centro_redonda">Criterios de evaluación</p>
+<p class="parrafo_2">Competencia específica 1.</p>
+<p class="parrafo_2">1.1 Texto criterio uno Tech band2</p>
+<p class="parrafo">1.2 Texto criterio dos Tech band2</p>
+<p class="centro_negrita">Latín</p>
+<p class="parrafo_2">Competencias específicas.</p>
+<p class="parrafo_2">1. Texto real de competencia específica Latín</p>
+<p class="centro_cursiva">Cuarto curso</p>
+<p class="centro_redonda">Criterios de evaluación</p>
+<p class="parrafo_2">Competencia específica 1.</p>
+<p class="parrafo_2">1.1 Texto criterio uno Latín</p>
+<p class="parrafo">1.2 Texto criterio dos Latín</p>
+</version></bloque></data></response>
